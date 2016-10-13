@@ -58,24 +58,24 @@ module BalancedBinaryTree =
     let leftRotate t =
         match t with
         | EmptyTree -> EmptyTree
-        | Tree(Datum(rootData,_),lc,rc) ->
-            match rc with
-            | EmptyTree -> t // we can't leftRotate a tree which has no right-hand child...
-            | Tree(Datum(rcData,_), lcOfRc, rcOfRc) ->
-                let newLc = 
-                    Tree(Datum(rootData,(max (tHeight lc) (tHeight lcOfRc)) + 1), lc, lcOfRc)
-                Tree(Datum(rcData, (max (tHeight newLc) (tHeight rcOfRc)) + 1), newLc, rcOfRc)
+        | Tree(_,_,EmptyTree) -> t
+        | Tree(Datum(rootData,_),lc,Tree(Datum(rcData,_), lcOfRc, rcOfRc)) ->
+            let newLcHeight = 
+                (max (tHeight lc) (tHeight lcOfRc)) + 1
+            Tree(Datum(rcData, (max newLcHeight (tHeight rcOfRc)) + 1), 
+                 (Tree(Datum(rootData, newLcHeight), lc, lcOfRc)),
+                 rcOfRc)
 
     let rightRotate t =
         match t with
         | EmptyTree -> EmptyTree
-        | Tree(Datum(rootData,_),lc,rc) ->
-            match lc with
-            | EmptyTree -> t // we can't rightRotate a tree which has no left-hand child...
-            | Tree(Datum(lcData,_), lcOfLc, rcOfLc) ->
-                let newRc =
-                    Tree(Datum(rootData, (max (tHeight rcOfLc) (tHeight rc))+1), rcOfLc, rc)
-                Tree(Datum(lcData, (max (tHeight lcOfLc) (tHeight newRc))+1), lcOfLc, newRc)
+        | Tree(_,EmptyTree,_) -> t
+        | Tree(Datum(rootData,_),Tree(Datum(lcData,_),lcOfLc,rcOfLc),rc) ->
+            let newRcHeight =
+                (max (tHeight rcOfLc) (tHeight rc)) + 1
+            Tree(Datum(lcData, (max (tHeight lcOfLc) newRcHeight)+1),
+                 lcOfLc,
+                 Tree(Datum(rootData, newRcHeight), rcOfLc, rc))
 
 (*
     let leftRotate t =
