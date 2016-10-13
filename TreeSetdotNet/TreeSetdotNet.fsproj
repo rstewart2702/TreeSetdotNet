@@ -43,8 +43,10 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SearchTrees.fsi" />
     <Compile Include="SearchTrees.fs" />
-    <Compile Include="Library1.fs" />
+    <Compile Include="LibraryDriver.fsi" />
+    <Compile Include="LibraryDriver.fs" />
     <None Include="Script.fsx" />
   </ItemGroup>
   <PropertyGroup>

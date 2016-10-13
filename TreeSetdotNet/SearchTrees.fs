@@ -1,4 +1,4 @@
-﻿namespace SearchTrees
+﻿namespace TreeSetdotNet
 
 module BalancedBinaryTree =
     type 'K KeyRecord =
