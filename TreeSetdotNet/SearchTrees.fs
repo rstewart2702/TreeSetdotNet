@@ -98,8 +98,8 @@ module BalancedBinaryTree =
                         let newRc =
                             rightRotate rc
                         leftRotate (Tree(Datum(rootKey,(max heightLc (tHeight newRc))+1),
-                                            lc,
-                                            newRc))
+                                         lc,
+                                         newRc))
                 else
                     if (tHeight rcOfLc) <= (tHeight lcOfLc) then
                         rightRotate t
@@ -107,8 +107,8 @@ module BalancedBinaryTree =
                         let newLc =
                             leftRotate lc
                         rightRotate (Tree(Datum(rootKey,(max (tHeight newLc) heightRc)+1),
-                                            newLc,
-                                            rc))
+                                          newLc,
+                                          rc))
             else t                    
 
     let rec btInsert t k =
