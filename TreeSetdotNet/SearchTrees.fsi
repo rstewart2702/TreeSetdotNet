@@ -13,7 +13,9 @@ namespace TreeSetdotNet
     val tDatum : t:'a BalancedSearchTree -> 'a KeyRecord option
     val tKandH : t:'a BalancedSearchTree -> ('a * int) option
     val leftRotate :
-      t:'a option BalancedSearchTree -> 'a option BalancedSearchTree
+      t:'a BalancedSearchTree -> 'a BalancedSearchTree
+    val rightRotate :
+      t:'a BalancedSearchTree -> 'a BalancedSearchTree
   end
 
 

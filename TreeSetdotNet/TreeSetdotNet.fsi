@@ -1,6 +1,6 @@
 
 
-namespace SearchTrees
+namespace TreeSetdotNet
   module BalancedBinaryTree = begin
     type 'K KeyRecord = | Datum of 'K * int
     type 'K BalancedSearchTree =
@@ -12,8 +12,8 @@ namespace SearchTrees
     val tHeight : t:'a BalancedSearchTree -> int
     val tDatum : t:'a BalancedSearchTree -> 'a KeyRecord option
     val tKandH : t:'a BalancedSearchTree -> ('a * int) option
-    val leftRotate :
-      t:'a option BalancedSearchTree -> 'a option BalancedSearchTree
+    val leftRotate : t:'a BalancedSearchTree -> 'a BalancedSearchTree
+    val rightRotate : t:'a BalancedSearchTree -> 'a BalancedSearchTree
   end
 
 namespace TreeSetdotNet

@@ -45,25 +45,37 @@ module BalancedBinaryTree =
         | Tree(Datum(k,h),_,_) -> Some (k,h)
         | EmptyTree -> None
 
+    // These rotation primitives are shockingly short and elegant.
+    //
+    // I was nearly driven towards this formulation by attempts
+    // to avoid "incomplete pattern match" warnings from the F# compiler.
+    // So, the act of trying to get the structure of the types to help
+    // drive the structure of the function actually led us to a correct
+    // function.
+    // These are superfically different from the corresponding Scheme 
+    // functions, but I suspect this may be due mainly to the 
+    // abbreviation/shortening provided by pattern matching!
     let leftRotate t =
-        let rc = rChild t
-        let lc = lChild t
-        let lcOfRc = lChild rc
-        let rcOfRc = rChild rc
-        let heightOfLc = tHeight lc
-        let heightOfLcOfRc = tHeight lcOfRc
-        let rootData = 
-            match tDatum t with
-            | Some (Datum(x,_)) -> x
-            | None -> None // not supposed to happen...
-        let newLc =
-            Tree(Datum(rootData,(max heightOfLc heightOfLcOfRc) + 1), lc, lcOfRc)
-        let rcData =
-            match tDatum rc with
-            | Some (Datum(x,_)) -> x
-            | None -> None // not supposed to happen...
-        let newRc = rcOfRc
-        Tree(Datum(rcData, (max (tHeight newLc) (tHeight newRc)) + 1), newLc, newRc)
+        match t with
+        | EmptyTree -> EmptyTree
+        | Tree(Datum(rootData,_),lc,rc) ->
+            match rc with
+            | EmptyTree -> t // we can't leftRotate a tree which has no right-hand child...
+            | Tree(Datum(rcData,_), lcOfRc, rcOfRc) ->
+                let newLc = 
+                    Tree(Datum(rootData,(max (tHeight lc) (tHeight lcOfRc)) + 1), lc, lcOfRc)
+                Tree(Datum(rcData, (max (tHeight newLc) (tHeight rcOfRc)) + 1), newLc, rcOfRc)
+
+    let rightRotate t =
+        match t with
+        | EmptyTree -> EmptyTree
+        | Tree(Datum(rootData,_),lc,rc) ->
+            match lc with
+            | EmptyTree -> t // we can't rightRotate a tree which has no left-hand child...
+            | Tree(Datum(lcData,_), lcOfLc, rcOfLc) ->
+                let newRc =
+                    Tree(Datum(rootData, (max (tHeight rcOfLc) (tHeight rc))+1), rcOfLc, rc)
+                Tree(Datum(lcData, (max (tHeight lcOfLc) (tHeight newRc))+1), lcOfLc, newRc)
 
 (*
     let leftRotate t =
