@@ -81,6 +81,92 @@ module BalancedBinaryTree =
                  lcOfLc,
                  Tree(Datum(rootData, newRcHeight), rcOfLc, rc))
 
+
+    let rebalance t =
+        match t with
+        | EmptyTree -> EmptyTree
+        | Tree(Datum(rootKey,_),lc,rc) ->
+            if (abs (tHeight lc) - (tHeight rc)) > 1 then
+                match lc, rc with
+                | (Tree(_,lcOfLc,rcOfLc)),(Tree(_,lcOfRc,rcOfRc)) ->
+                    if (tHeight lc) < (tHeight rc) then
+                        if (tHeight lcOfRc) <= (tHeight rcOfRc) then 
+                            leftRotate t
+                        else
+                            let newRc =
+                                rightRotate rc
+                            leftRotate (Tree(Datum(rootKey,(max (tHeight lc) (tHeight newRc))+1),
+                                             lc,
+                                             newRc))
+                    else
+                        if (tHeight rcOfLc) <= (tHeight lcOfLc) then
+                            rightRotate t
+                        else
+                            let newLc =
+                                leftRotate lc
+                            rightRotate (Tree(Datum(rootKey,(max (tHeight newLc) (tHeight rc))+1),
+                                              newLc,
+                                              rc))
+            else t
+
+    let rebalance2 t =
+        match t with
+        | EmptyTree -> EmptyTree
+        | Tree(_,EmptyTree,_) -> t
+        | Tree(_,_,EmptyTree) -> t
+        | Tree(Datum(rootKey,_),
+               (Tree(Datum(_,heightLc),lcOfLc,rcOfLc) as lc),
+               (Tree(Datum(_,heightRc),lcOfRc,rcOfRc) as rc)) ->
+            if (abs heightLc - heightRc) > 1 then
+                if heightLc < heightRc then
+                    if (tHeight lcOfRc) <= (tHeight rcOfRc) then 
+                        leftRotate t
+                    else
+                        let newRc =
+                            rightRotate rc
+                        leftRotate (Tree(Datum(rootKey,(max heightLc (tHeight newRc))+1),
+                                            lc,
+                                            newRc))
+                else
+                    if (tHeight rcOfLc) <= (tHeight lcOfLc) then
+                        rightRotate t
+                    else
+                        let newLc =
+                            leftRotate lc
+                        rightRotate (Tree(Datum(rootKey,(max (tHeight newLc) heightRc)+1),
+                                            newLc,
+                                            rc))
+            else t                    
+
+    let rec btInsert t k =
+        match t with
+        | EmptyTree -> Tree(Datum(k,0),EmptyTree,EmptyTree)
+        | Tree(Datum(rootKey,_),lc,rc) ->
+            let ltNew =
+                if rootKey < k then
+                    btInsert lc k
+                else
+                    lc
+            let rtNew = 
+                if rootKey < k then
+                    rc
+                else
+                    btInsert rc k
+            rebalance ( Tree(Datum(rootKey, (max (tHeight ltNew) (tHeight rtNew))+1),ltNew,rtNew) )
+
+//        | Tree(Datum(rootKey,_),lc,rc) when rootKey < k ->
+//            let ltNew =
+//                btInsert lc k
+//            let rtNew = 
+//                rc
+//            rebalance Tree(Datum(rootKey, (max (tHeight ltNew) (tHeight rtNew))+1),ltNew,rtNew)
+//        | Tree(Datum(rootKey,_),lc,rc) when k < rootKey ->
+//            let ltNew =
+//                lc
+//            let rtNew =
+//                btInsert rc k
+//            rebalance Tree(Datum(rootKey, (max (tHeight ltNew) (tHeight rtNew))+1),ltNew,rtNew)
+            
     (* 
     Need several operations:
     + Create a treeset?
