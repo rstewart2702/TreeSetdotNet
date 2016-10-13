@@ -24,7 +24,7 @@ module BalancedBinaryTree =
 
     let rChild t =
         match t with
-        | Tree(_,_,x) -> x 
+        | Tree(_,_,rc) -> rc
         //| Tree(_,_,(Tree(_,_,_) as rc)) -> rc
         //| Tree(_,_,EmptyTree) -> EmptyTree
         | EmptyTree -> EmptyTree
@@ -45,7 +45,7 @@ module BalancedBinaryTree =
         | Tree(Datum(k,h),_,_) -> Some (k,h)
         | EmptyTree -> None
 
-    let leftRotate1 t =
+    let leftRotate t =
         let rc = rChild t
         let lc = lChild t
         let lcOfRc = lChild rc
