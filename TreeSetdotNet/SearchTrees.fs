@@ -59,7 +59,9 @@ module BalancedBinaryTree =
         match t with
         | EmptyTree -> EmptyTree
         | Tree(_,_,EmptyTree) -> t
-        | Tree(Datum(rootData,_),lc,Tree(Datum(rcData,_), lcOfRc, rcOfRc)) ->
+        | Tree(Datum(rootData,_),
+               lc,
+               Tree(Datum(rcData,_), lcOfRc, rcOfRc)) ->
             let newLcHeight = 
                 (max (tHeight lc) (tHeight lcOfRc)) + 1
             Tree(Datum(rcData, (max newLcHeight (tHeight rcOfRc)) + 1), 
@@ -70,10 +72,12 @@ module BalancedBinaryTree =
         match t with
         | EmptyTree -> EmptyTree
         | Tree(_,EmptyTree,_) -> t
-        | Tree(Datum(rootData,_),Tree(Datum(lcData,_),lcOfLc,rcOfLc),rc) ->
+        | Tree(Datum(rootData,_),
+               Tree(Datum(lcData,_),lcOfLc,rcOfLc),
+               rc) ->
             let newRcHeight =
                 (max (tHeight rcOfLc) (tHeight rc)) + 1
-            Tree(Datum(lcData, (max (tHeight lcOfLc) newRcHeight)+1),
+            Tree(Datum(lcData, (max (tHeight lcOfLc) newRcHeight) + 1),
                  lcOfLc,
                  Tree(Datum(rootData, newRcHeight), rcOfLc, rc))
 
