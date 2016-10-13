@@ -126,6 +126,34 @@ module BalancedBinaryTree =
                 else
                     rc 
             rebalance ( Tree(Datum(rootKey, (max (tHeight ltNew) (tHeight rtNew))+1),ltNew,rtNew) )
+
+    let rec btRemove t k =
+        match t with
+        | EmptyTree -> EmptyTree
+        | Tree(Datum(k,0),EmptyTree,EmptyTree) -> EmptyTree
+        | Tree(Datum(k,1),EmptyTree,rc) -> rc
+        | Tree(Datum(k,1),lc,EmptyTree) -> lc
+        | Tree(Datum(rootKey,h),lc,rc) -> 
+            if k < rootKey then
+                let newLc =
+                    btRemove lc k
+                rebalance (Tree(Datum(rootKey,(max (tHeight newLc) (tHeight rc))+1),
+                                newLc,
+                                rc))
+            else if rootKey < k then
+                let newRc = 
+                    btRemove rc k
+                rebalance (Tree(Datum(rootKey,(max (tHeight lc) (tHeight newRc))+1),
+                                lc,
+                                newRc))
+            else 
+                let minKey =
+                    findMin rc
+                let newRc =
+                    btRemove rc minKey
+                rebalance (Tree(Datum(minKey, (max (tHeight lc) (tHeight newRc))+1),
+                                lc,
+                                newRc))
             
     (* 
     Need several operations:
