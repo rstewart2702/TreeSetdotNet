@@ -28,6 +28,16 @@ btInsert (
       "James, Rick" |> 
       btInsert (btInsert (btInsert (btInsert (btInsert myT "Smith, Bob") "Jones, Richard") "Hicks, Alfred") "Jackson, Gary")))
 
+"Jannson, Tove" |>
+btInsert (
+    "Ockinga, Harold" |>
+    btInsert (
+        "Lister, Hugh" |>
+        btInsert (
+            "James, Rick" |> 
+            btInsert (btInsert (btInsert (btInsert (btInsert myT "Smith, Bob") "Jones, Richard") "Hicks, Alfred") "Jackson, Gary"))) )
+
+
 [ "Smith, Bob"; "Jones, Richard"; "Hicks, Alfred"; "Jackson, Gary"; "James, Rick"; "Lister, Hugh"; "Ockenga, Harold";
   "Orvis, Bob"; "Ostend, Dean"; "Jannson, Tove" ] |> List.fold btInsert EmptyTree
 (* 
@@ -49,6 +59,62 @@ val it : string BalancedSearchTree =
            Tree (Datum ("Smith, Bob",0),EmptyTree,EmptyTree))))
 *)
 
+[ "Smith, Bob"; "Jones, Richard"; "Hicks, Alfred"; "Jackson, Gary"; "James, Rick"; "Lister, Hugh"; "Ockenga, Harold";
+  "Orvis, Bob"; "Ostend, Dean"; "Jannson, Tove"; "Stewart, Richard" ] |> List.fold btInsert EmptyTree
+(* 
+val it : string BalancedSearchTree =
+  Tree
+    (Datum ("Jones, Richard",3),
+     Tree
+       (Datum ("Jackson, Gary",2),
+        Tree (Datum ("Hicks, Alfred",0),EmptyTree,EmptyTree),
+        Tree
+          (Datum ("James, Rick",1),EmptyTree,
+           Tree (Datum ("Jannson, Tove",0),EmptyTree,EmptyTree))),
+     Tree
+       (Datum ("Ostend, Dean",2),
+        Tree
+          (Datum ("Ockenga, Harold",1),
+           Tree (Datum ("Lister, Hugh",0),EmptyTree,EmptyTree),
+           Tree (Datum ("Orvis, Bob",0),EmptyTree,EmptyTree)),
+        Tree
+          (Datum ("Smith, Bob",1),EmptyTree,
+           Tree (Datum ("Stewart, Richard",0),EmptyTree,EmptyTree))))
+*)  
+
+btRemove 
+    ([ "Smith, Bob"; "Jones, Richard"; "Hicks, Alfred"; "Jackson, Gary"; "James, Rick"; "Lister, Hugh"; "Ockenga, Harold";
+         "Orvis, Bob"; "Ostend, Dean"; "Jannson, Tove"; "Stewart, Richard" ] |> List.fold btInsert EmptyTree)
+    "Jones, Richard"
+
+btRemove 
+    ([ "Smith, Bob"; "Jones, Richard"; "Hicks, Alfred"; "Jackson, Gary"; "James, Rick"; "Lister, Hugh"; "Ockenga, Harold";
+         "Orvis, Bob"; "Ostend, Dean"; "Jannson, Tove"; "Stewart, Richard" ] |> List.fold btInsert EmptyTree)
+    "Stewart, Richard"
+      
+btRemove
+    (btRemove 
+        ([ "Smith, Bob"; "Jones, Richard"; "Hicks, Alfred"; "Jackson, Gary"; "James, Rick"; "Lister, Hugh"; "Ockenga, Harold";
+           "Orvis, Bob"; "Ostend, Dean"; "Jannson, Tove"; "Stewart, Richard" ] |> List.fold btInsert EmptyTree)
+        "Stewart, Richard"
+    )
+    "Jackson, Gary"
+
+btRemove
+    (btRemove 
+        ([ "Smith, Bob"; "Jones, Richard"; "Hicks, Alfred"; "Jackson, Gary"; "James, Rick"; "Lister, Hugh"; "Ockenga, Harold";
+           "Orvis, Bob"; "Ostend, Dean"; "Jannson, Tove"; "Stewart, Richard" ] |> List.fold btInsert EmptyTree)
+        "Stewart, Richard"
+    )
+    "Ostend, Dean"
+
+[ "Smith, Bob"; "Jones, Richard"; "Hicks, Alfred"; "Jackson, Gary"; "James, Rick"; "Lister, Hugh"; "Ockenga, Harold";
+           "Orvis, Bob"; "Ostend, Dean"; "Jannson, Tove"; "Stewart, Richard" ; "Patrick, Chad"; "Quinn, Anthony" ] 
+           |> List.fold btInsert EmptyTree
+
+
+
+
 // The following exposed a bug, probably with the rebalance function:
 
 [ "Smith, Bob"; "Jones, Richard"; "Hicks, Alfred"; "Jackson, Gary"; "James, Rick"; "Lister, Hugh"; "Ockenga, Harold" ]
@@ -68,3 +134,8 @@ val it : string BalancedSearchTree =
 *)
 
 [ "Smith, Bob"; "Jones, Richard"; "Hicks, Alfred" ] |> List.fold btInsert EmptyTree
+
+
+btRemove 
+    (Tree(Datum("Smith, Bob",1),EmptyTree,Tree(Datum("Stewart, Richard",0),EmptyTree,EmptyTree))) "Stewart, Richard"
+
