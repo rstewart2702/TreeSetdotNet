@@ -127,33 +127,63 @@ module BalancedBinaryTree =
                     rc 
             rebalance ( Tree(Datum(rootKey, (max (tHeight ltNew) (tHeight rtNew))+1),ltNew,rtNew) )
 
+    let rec findMin t = 
+        match t with 
+        | EmptyTree -> None
+        | Tree(Datum(k,_),EmptyTree,_) -> Some k
+        | Tree(Datum(k,_),(Tree(_,_,_) as lc),_) -> findMin lc
+
     let rec btRemove t k =
         match t with
         | EmptyTree -> EmptyTree
+        // The search key is in the root, and is the only value stored in the tree:
         | Tree(Datum(k,0),EmptyTree,EmptyTree) -> EmptyTree
+        // There is no left child, and the search key is in the root of the tree:
         | Tree(Datum(k,1),EmptyTree,rc) -> rc
+        // There is no right child, and the search key is in the root of the tree:
         | Tree(Datum(k,1),lc,EmptyTree) -> lc
+        // The search key is NOT in the root:
         | Tree(Datum(rootKey,h),lc,rc) -> 
             if k < rootKey then
+                // If the search key falls to the left of the root key:
+                // Calculate a new left tree by removing the item from the left-hand
+                // tree...
                 let newLc =
                     btRemove lc k
+                // ...and calculate a new resulting tree by rebalancing the reassembled
+                // tree
                 rebalance (Tree(Datum(rootKey,(max (tHeight newLc) (tHeight rc))+1),
                                 newLc,
                                 rc))
             else if rootKey < k then
+                // If the search key falls to the right of the root key:
+                // Calculate a new right-hand tree by removing the searched-for item
+                // from the right-hand tree...
                 let newRc = 
                     btRemove rc k
+                // ...and calculate a new resulting tree by rebalancing the reassembled
+                // tree:
                 rebalance (Tree(Datum(rootKey,(max (tHeight lc) (tHeight newRc))+1),
                                 lc,
                                 newRc))
             else 
-                let minKey =
-                    findMin rc
-                let newRc =
-                    btRemove rc minKey
-                rebalance (Tree(Datum(minKey, (max (tHeight lc) (tHeight newRc))+1),
-                                lc,
-                                newRc))
+                // The rootKey = search key, k, so we must re-stitch the tree
+                // back together by deriving a new root from the minimum element
+                // of the right-hand tree, rc.
+                //
+                // findMin has to return an Option-typed value.
+                // This means we must unpack it via the following match expression.
+                match (findMin rc) with
+                | Some k ->
+                    let newRc = 
+                        btRemove rc k
+                    rebalance (
+                        Tree(Datum(k, (max (tHeight lc) (tHeight newRc))+1),
+                                   lc,
+                                   newRc)
+                    )
+                | None -> EmptyTree
+
             
     (* 
     Need several operations:
