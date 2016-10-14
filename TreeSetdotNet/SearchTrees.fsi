@@ -16,6 +16,21 @@ namespace TreeSetdotNet
       t:'a BalancedSearchTree -> 'a BalancedSearchTree
     val rightRotate :
       t:'a BalancedSearchTree -> 'a BalancedSearchTree
+    val rebalance :
+      t: 'a BalancedSearchTree -> 'a BalancedSearchTree
+    val findMin :
+      t: 'a BalancedSearchTree -> 'a option
+    // When we get to the insertion and deletion operators, 
+    // the values provided into the tree must implement the IComparable
+    // interface!  That is what 
+    //   when 'a : comparison
+    // means, fundamentally.
+    val btInsert :
+      t: 'a  BalancedSearchTree -> k: 'a -> 'a BalancedSearchTree
+        when 'a : comparison
+    val btRemove :
+      t: 'a BalancedSearchTree -> k: 'a -> 'a BalancedSearchTree
+        when 'a : comparison
   end
 
 
