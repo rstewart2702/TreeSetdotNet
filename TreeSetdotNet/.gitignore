@@ -1,3 +1,4 @@
 bin
 obj
-TreeSetdotNet.fsi # leave out the generated "signatures" file.
+# leave out the generated "signatures" file.
+TreeSetdotNet.fsi
