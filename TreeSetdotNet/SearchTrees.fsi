@@ -31,6 +31,43 @@ namespace TreeSetdotNet
     val btRemove :
       t: 'a BalancedSearchTree -> k: 'a -> 'a BalancedSearchTree
         when 'a : comparison
+    //
+    val rightConcat :
+      lt: 'a BalancedSearchTree -> x: 'a -> rt: 'a BalancedSearchTree -> 'a BalancedSearchTree
+        when 'a : comparison
+    val leftConcat :
+      lt: 'a BalancedSearchTree -> x: 'a -> rt: 'a BalancedSearchTree -> 'a BalancedSearchTree
+        when 'a : comparison
+    //
+    val concatTrees :
+      lt: 'a BalancedSearchTree -> x: 'a -> rt: 'a BalancedSearchTree -> 'a BalancedSearchTree
+        when 'a : comparison
+    val concatSets: 
+      ls: 'a BalancedSearchTree -> 'a BalancedSearchTree -> 'a BalancedSearchTree
+        when 'a : comparison
+    //
+    type BSTZipperDirection =
+        Left
+        | Right
+        | NeitherDir
+
+    type 'K BSTZipper =
+        (BSTZipperDirection * 'K BalancedSearchTree) list
+    //
+    val zipperTop :
+      z: 'a BSTZipper -> 'a BSTZipper
+        when 'a : comparison
+    val zipTraverse :
+      z: 'a BSTZipper -> k: 'a -> 'a BSTZipper
+        when 'a : comparison
+    val zipperMoveTo :
+      z: 'a BSTZipper -> k: 'a -> 'a BSTZipper
+    val zipSplit :
+      z: 'a BSTZipper -> ls: 'a BalancedSearchTree -> rs: 'a BalancedSearchTree -> ('a BalancedSearchTree * 'a BalancedSearchTree)
+        when 'a : comparison
+    val splitTree :
+      t: 'a BalancedSearchTree -> k: 'a -> ('a BalancedSearchTree * 'a BalancedSearchTree)
+        when 'a : comparison
   end
 
 

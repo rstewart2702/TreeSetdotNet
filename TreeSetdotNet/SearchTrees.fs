@@ -195,6 +195,113 @@ module BalancedBinaryTree =
                     // list of matching expressions.  This is much simpler.
                     lc
 
+    let rec rightConcat lt x rt =
+        // Concatenation of rt onto lt, where rt is assumed to be shorter,
+        // and the key ranges of the two trees DO *NOT* OVERLAP.
+        // If the trees' key ranges do overlap, then this function
+        // will not correctly concatenate the sets together!
+        match lt, rt with
+        | EmptyTree, EmptyTree ->   Tree(Datum(x,0),EmptyTree,EmptyTree)
+        | EmptyTree, Tree(_,_,_) -> Tree(Datum(x,1),EmptyTree,rt)
+        | Tree(_,_,_), EmptyTree -> Tree(Datum(x,1),lt,EmptyTree)
+        | Tree(Datum(dl,hl),lcOfLt,rcOfLt), Tree(Datum(_,hr),_,_) ->
+            if hl > hr then
+                let newRt =
+                    rightConcat rcOfLt x rt
+                rebalance (
+                    Tree(Datum(dl, (max (tHeight lcOfLt) (tHeight newRt))+1),lcOfLt,newRt)
+                )
+            else // if hl <= hr then
+                // hr - hl <= 1, correct?  This HAS to be the case, correct?
+                Tree(Datum(x,(max hl hr)+1),lt,rt)
+
+    let rec leftConcat lt x rt =
+        match lt, rt with
+        | EmptyTree, EmptyTree ->   Tree(Datum(x,0),EmptyTree,EmptyTree)
+        | EmptyTree, Tree(_,_,_) -> Tree(Datum(x,1),EmptyTree,rt)
+        | Tree(_,_,_), EmptyTree -> Tree(Datum(x,1),lt,EmptyTree)
+        | Tree(Datum(_,hl),_,_), Tree(Datum(dr,hr),lcOfRt,rcOfRt) ->
+            if hl < hr then
+                let newLt = 
+                    leftConcat lt x lcOfRt
+                rebalance (
+                    Tree(Datum(dr,(max (tHeight newLt) (tHeight rcOfRt))+1),newLt,rcOfRt)
+                )
+            else
+                Tree(Datum(x,(max hl hr)+1),lt,rt)
+
+    let concatTrees lt x rt =
+        if (tHeight lt) < (tHeight rt) then leftConcat lt x rt
+        else rightConcat lt x rt
+
+    let concatSets ls rs =
+        let newKey = findMin rs
+        match newKey with
+        | None -> 
+            ls
+        | Some k ->
+            btRemove rs k |> concatTrees ls k
+            // concatTrees ls k (btRemove rs k)
+
+    type BSTZipperDirection =
+        Left
+        | Right
+        | NeitherDir
+
+    type 'K BSTZipper =
+        (BSTZipperDirection * 'K BalancedSearchTree) list
+
+    let rec zipperTop z =
+        match z with
+        | [] -> []
+        | headZ :: tailZ ->
+            match headZ with
+            | NeitherDir, _ -> z
+            | (Left, _) | (Right, _) -> tailZ
+
+    let rec zipTraverse z k =
+        match z with
+        | [] -> []
+        | headZ :: tailZ ->
+            match headZ with
+            | _, t ->
+                match t with
+                | EmptyTree -> z
+                | Tree(Datum(dk,_),lc,rc) ->
+                    if k < dk then
+                        zipTraverse ((Left,lc)::z) k
+                    else if dk < k then 
+                        zipTraverse ((Right,rc)::z) k
+                    else z
+
+    let rec zipperMoveTo z k =
+        zipTraverse (zipperTop z) k
+
+    let rec zipSplit z ls rs =
+        match z with
+        | [] -> ls, rs
+        | headZ :: tailZ ->
+            let lSplit =
+                match headZ with
+                | (NeitherDir|Left), t ->
+                    concatSets t ls
+                | Right, _ ->
+                    ls
+            let rSplit =
+                match headZ with
+                | (NeitherDir|Right), t ->
+                    concatSets t rs
+                | Left, _ ->
+                    rs
+            zipSplit tailZ lSplit rSplit
+
+    let rec splitTree t k =
+        let locZip = 
+            zipTraverse [(NeitherDir,t)] k
+        zipSplit locZip EmptyTree EmptyTree
+    
+
+
     (* 
     Need several operations:
     + Create a treeset?
@@ -212,5 +319,5 @@ module BalancedBinaryTree =
 
     Others:
     + Turn the tree-set into a list of data?
-    + 
+    + Cursor/zipper
     *)
