@@ -256,7 +256,8 @@ module BalancedBinaryTree =
         | [] -> []
         | headZ :: tailZ ->
             match headZ with
-            | NeitherDir, _ -> z
+            | _, EmptyTree -> z
+            | NeitherDir, Tree(_,_,_) -> z
             | (Left, _) | (Right, _) -> tailZ
 
     let rec zipTraverse z k =
