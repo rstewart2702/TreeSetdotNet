@@ -309,13 +309,13 @@ module BalancedBinaryTree =
             match headZ with
             | Left,  (Tree(Datum(k,_), _, rc) as t) -> 
                 zipSplitR 
-                  (concatSets ls focusTree) 
-                  (concatSets (btInsert rc k) rs)
+                  ls
+                  (concatSets rs (btInsert rc k))
                   (tailZ , t)
             | Right, (Tree(Datum(k,_), lc, _) as t) ->
                 zipSplitR 
-                  (concatSets ls (btInsert lc k)) 
-                  (concatSets focusTree rs) 
+                  (concatSets (btInsert lc k) ls) 
+                  rs
                   (tailZ , t)
             | _,     EmptyTree -> 
                 ls, rs
@@ -352,8 +352,14 @@ module BalancedBinaryTree =
         | _, EmptyTree -> EmptyTree, EmptyTree
         | [], Tree(_,flc,frc) ->
             flc, frc
-        | _, (Tree(_,flc,frc) as focusTree) ->
-            zipSplitR flc frc z
+        | headZ :: tailZ , (Tree(_,flc,frc) as focusTree) ->
+            let newFocusTree =
+                match headZ with
+                | _, t -> t
+            zipSplitR flc frc (tailZ, newFocusTree)
+//        | _, (Tree(_,flc,frc) as focusTree) ->
+//            zipSplitR flc frc z
+
 //            match headZ with
 //            | _, t ->
 //                zipSplitR flc frc (tailZ, t)
