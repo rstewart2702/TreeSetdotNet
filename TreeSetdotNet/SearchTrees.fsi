@@ -49,10 +49,13 @@ namespace TreeSetdotNet
     type BSTZipperDirection =
         Left
         | Right
-        | NeitherDir
+        // | NeitherDir
+
+    type 'K BSTZipPath =
+        (BSTZipperDirection * 'K BalancedSearchTree) list
 
     type 'K BSTZipper =
-        (BSTZipperDirection * 'K BalancedSearchTree) list
+        'K BSTZipPath * 'K BalancedSearchTree
     //
     val zipperTop :
       z: 'a BSTZipper -> 'a BSTZipper
@@ -62,11 +65,23 @@ namespace TreeSetdotNet
         when 'a : comparison
     val zipperMoveTo :
       z: 'a BSTZipper -> k: 'a -> 'a BSTZipper
+       when 'a : comparison
+    val zipSplitR :
+        ls: 'a BalancedSearchTree 
+        -> rs: 'a BalancedSearchTree 
+        -> z: 'a BSTZipper 
+        -> ('a BalancedSearchTree * 'a BalancedSearchTree)
+        when 'a : comparison
     val zipSplit :
-      z: 'a BSTZipper -> ls: 'a BalancedSearchTree -> rs: 'a BalancedSearchTree -> ('a BalancedSearchTree * 'a BalancedSearchTree)
+      z: 'a BSTZipper -> ('a BalancedSearchTree * 'a BalancedSearchTree)
         when 'a : comparison
     val splitTree :
       t: 'a BalancedSearchTree -> k: 'a -> ('a BalancedSearchTree * 'a BalancedSearchTree)
+        when 'a : comparison
+    //
+    // Miscellaneous:
+    val flip : f: ('b -> 'a ->'c) -> x:'a -> y:'b -> 'c
+    val treeInorder: t: ('a BalancedSearchTree) -> ('a list)
         when 'a : comparison
   end
 

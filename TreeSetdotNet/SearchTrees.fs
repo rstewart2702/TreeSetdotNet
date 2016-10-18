@@ -246,62 +246,148 @@ module BalancedBinaryTree =
     type BSTZipperDirection =
         Left
         | Right
-        | NeitherDir
+        // | NeitherDir
+
+    type 'K BSTZipPath =
+        (BSTZipperDirection * 'K BalancedSearchTree) list
 
     type 'K BSTZipper =
-        (BSTZipperDirection * 'K BalancedSearchTree) list
+        'K BSTZipPath * 'K BalancedSearchTree
 
     let rec zipperTop z =
         match z with
-        | [] -> []
-        | headZ :: tailZ ->
-            match headZ with
-            | _, EmptyTree -> z
-            | NeitherDir, Tree(_,_,_) -> z
-            | (Left, _) | (Right, _) -> tailZ
+        | [], EmptyTree -> z
+        | [], Tree(_,_,_) -> z
+        | (pathHead :: pathTail) , t ->
+            match pathHead with
+            | (Left|Right), t ->
+                zipperTop (pathTail, t)
+//            zipperTop (pathTail, t)
+//            match pathHead with
+//            | _ , EmptyTree -> [], t
+//            | (Left|Right), t -> zipperTop (pathTail, t)
+
+//        match z with
+//        | [] -> []
+//        | headZ :: tailZ ->
+//            match headZ with
+//            | _, EmptyTree -> z
+//            | NeitherDir, Tree(_,_,_) -> z
+//            | (Left, _) | (Right, _) -> tailZ
 
     let rec zipTraverse z k =
         match z with
-        | [] -> []
-        | headZ :: tailZ ->
-            match headZ with
-            | _, t ->
-                match t with
-                | EmptyTree -> z
-                | Tree(Datum(dk,_),lc,rc) ->
-                    if k < dk then
-                        zipTraverse ((Left,lc)::z) k
-                    else if dk < k then 
-                        zipTraverse ((Right,rc)::z) k
-                    else z
+        | _, EmptyTree -> z
+        | path, (Tree(Datum(rk,rh),lc,rc) as root) ->
+            if k < rk then
+                zipTraverse (((Left,root) :: path), lc) k
+            elif rk < k then
+                zipTraverse (((Right,root) :: path), rc) k
+            else z
+
+//        match z with
+//        | [] -> []
+//        | headZ :: tailZ ->
+//            match headZ with
+//            | _, t ->
+//                match t with
+//                | EmptyTree -> z
+//                | Tree(Datum(dk,_),lc,rc) ->
+//                    if k < dk then
+//                        zipTraverse ((Left,lc)::z) k
+//                    else if dk < k then 
+//                        zipTraverse ((Right,rc)::z) k
+//                    else z
 
     let rec zipperMoveTo z k =
         zipTraverse (zipperTop z) k
 
-    let rec zipSplit z ls rs =
+    let rec zipSplitR ls rs z =
         match z with
-        | [] -> ls, rs
-        | headZ :: tailZ ->
-            let lSplit =
-                match headZ with
-                | (NeitherDir|Left), t ->
-                    concatSets t ls
-                | Right, _ ->
-                    ls
-            let rSplit =
-                match headZ with
-                | (NeitherDir|Right), t ->
-                    concatSets t rs
-                | Left, _ ->
-                    rs
-            zipSplit tailZ lSplit rSplit
+        | [], _ -> ls, rs
+        | headZ :: tailZ, focusTree ->
+            match headZ with
+            | Left,  (Tree(Datum(k,_), _, rc) as t) -> 
+                zipSplitR 
+                  (concatSets ls focusTree) 
+                  (concatSets (btInsert rc k) rs)
+                  (tailZ , t)
+            | Right, (Tree(Datum(k,_), lc, _) as t) ->
+                zipSplitR 
+                  (concatSets ls (btInsert lc k)) 
+                  (concatSets focusTree rs) 
+                  (tailZ , t)
+            | _,     EmptyTree -> 
+                ls, rs
+
+                
+//        match z with
+//        | [] -> ls, rs
+//        | headZ :: tailZ ->
+//            match headZ with
+//            | NeitherDir , t -> ls, rs
+//            | Left , t -> zipSplitR tailZ (concatSets t ls) rs
+//            | Right, t -> zipSplitR tailZ ls (concatSets t rs)
+
+//            let lSplit =
+//                match headZ with
+//                | (NeitherDir|Left), EmptyTree ->
+//                    ls
+//                | (NeitherDir|Left), Tree(_,lc,_) ->
+//                    concatSets lc ls 
+//                | Right, _ ->
+//                    ls
+//            let rSplit =
+//                match headZ with
+//                | (NeitherDir|Right), EmptyTree ->
+//                    rs
+//                | (NeitherDir|Right), Tree(_,_,rc) ->
+//                    concatSets rc rs
+//                | Left, _ ->
+//                    rs
+//            zipSplitR tailZ lSplit rSplit
+
+    let zipSplit z =
+        match z with
+        | _, EmptyTree -> EmptyTree, EmptyTree
+        | [], Tree(_,flc,frc) ->
+            flc, frc
+        | _, (Tree(_,flc,frc) as focusTree) ->
+            zipSplitR flc frc z
+//            match headZ with
+//            | _, t ->
+//                zipSplitR flc frc (tailZ, t)
+
+//        match z with
+//        | [] -> EmptyTree, EmptyTree
+//        | headZ :: tailZ ->
+//            let lSplit =
+//                match headZ with
+//                | _ , EmptyTree -> EmptyTree
+//                | _ , Tree(_,lc,_) -> lc
+//            let rSplit =
+//                match headZ with
+//                | _ , EmptyTree -> EmptyTree
+//                | _ , Tree(_,_,rc) -> rc
+//            zipSplitR tailZ lSplit rSplit
 
     let rec splitTree t k =
         let locZip = 
-            zipTraverse [(NeitherDir,t)] k
-        zipSplit locZip EmptyTree EmptyTree
+            // zipTraverse [(NeitherDir,t)] k
+            zipTraverse ([],t) k
+        zipSplit locZip // EmptyTree EmptyTree
     
+    let flip f x y = f y x
 
+    let rec treeInorderR listAcc t =
+        match t with
+        | EmptyTree -> listAcc
+        | Tree(Datum(dk,_),lc,rc) ->
+            dk :: (treeInorderR listAcc lc) 
+            |> (flip treeInorderR rc)
+
+    let treeInorder t =
+        treeInorderR [] t |> List.rev
 
     (* 
     Need several operations:

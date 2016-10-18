@@ -139,3 +139,104 @@ val it : string BalancedSearchTree =
 btRemove 
     (Tree(Datum("Smith, Bob",1),EmptyTree,Tree(Datum("Stewart, Richard",0),EmptyTree,EmptyTree))) "Stewart, Richard"
 
+let lgTree =
+    ["Stewart, Richard" ;
+    "Bowers, Richard" ;
+    "Franklin, Regena" ;
+    "Dobbs, Richard" ;
+    "Gaddis, Calvin" ;
+    "Ford, Matthew" ;
+    "Flannery, William" ;
+    "Teukolsky, Saul" ;
+    "Cotillard, Marion" ;
+    "Holmes, Katie" ;
+    "Bessemer, Henry" ;
+    "Harkness, Jack" ;
+    "De Vargas, Juan" ;
+    "Martin, Chris" ;
+    "Nolan, Christopher" ;
+    "Thomas, Emma" ;
+    "Scharansky, Natan" ;
+    "Smith, Markus" ;
+    "Marvinson, Gus" ;
+    "Desmond, Charles" ;
+    "Chisman, Kerry" ;
+    "Jones, Kerri" ;
+    "Yee, Soo Jean" ;
+    "Pachelbel, Johann" ;
+    "Gavrilovich, Pavel" ;
+    "Hardy, Tom" ;
+    "Mott, Nathan" ;
+    "Casali, Roy" ;
+    "Murphy, Elaine" ;
+    "Bennett, Matthew" ;
+    "Wunder, Ron" ;
+    "Lewis, Holly" ;
+    "May, Parker" ;
+    "Bailey, Tom" ;
+    "McClinton, Rebecca" ;
+    "Selle, Bron" ;
+    "Richardson, Keith" ;
+    "Lewis, Clive" ;
+    "Tolkien, John Ronald Reuel" ;
+    "Austen, Jane" ;
+    "Jackson, Peter" ;
+    "Rai, Aishwarya" ;
+    "Roshan, Hrithik" ;
+    "Khan, Shah Rukh" ;
+    "Wilson, Warren" ;
+    "Leach, Nora" ;
+    "Lin, Zoe" ;
+    "Clancy, Scot" ;
+    "McBride, Martina" ;
+    "Ferrell, Will" ;
+    "Plantinga, Alvin" ;
+    "Kuyper, Abraham" ;
+    "Mohler, R. Albert" ;
+    "Walther, C.F.W." ;
+    "Poe, Edgar Alan" ;
+    "Barnett, Matthew" ;
+    "O'Reilly, Dennis" ;
+    "Camp, Colleen" ;
+    "Skarsgaard, Stellan" ;
+    "Skarsgaard, Alexander" ;
+    "Dijkstra, Edsger" ;
+    "Knuth, Donald" ;
+    "Wikstrom, Cornelius" ;
+    "Van Til, Cornelius" ;
+    "Poythress, Vern Sheridan" ;
+    "Frame, John" ;
+    "Horton, Michael" ;
+    "Pilkington, Paul" ;
+    "Piller, Michael" ;
+    "Orange, John" ;
+    "Mott, Nathan" ;
+    "Evers, David" ;
+    "Oliphant, Scott" ;
+    "Ellison, Harlan" ;
+    "DeRama, Peter" ;
+    "Okasaki, Chris" ;
+    "Tarjan, Robert E." ;
+    "Steele, Guy L" ;
+    ] |> List.fold btInsert EmptyTree ;;
+
+
+
+match (splitTree lgTree "Nolan, Christopher") with
+| EmptyTree, EmptyTree -> [], []
+| lt, rt -> (treeInorder lt, treeInorder rt)
+
+let myZip = 
+    zipTraverse ([],lgTree) "Wunder, Ron"
+
+match myZip with
+| [], _ -> []
+| headZ :: tailZ, t ->
+    (treeInorder t),
+    match headZ with
+    | _, EmptyTree -> []
+    | Left, t -> 
+
+match zipSplit (zipTraverse ([],lgTree) "Wunder, Ron") with
+| EmptyTree, EmptyTree -> [], []
+| lt, rt -> (treeInorder lt, treeInorder rt)
