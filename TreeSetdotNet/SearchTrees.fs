@@ -310,11 +310,11 @@ module BalancedBinaryTree =
             | Left,  (Tree(Datum(k,_), _, rc) as t) -> 
                 zipSplitR 
                   ls
-                  (concatSets rs (btInsert rc k))
+                  (concatTrees rs k rc)
                   (tailZ , t)
             | Right, (Tree(Datum(k,_), lc, _) as t) ->
                 zipSplitR 
-                  (concatSets (btInsert lc k) ls) 
+                  (concatTrees lc k ls)
                   rs
                   (tailZ , t)
             | _,     EmptyTree -> 
