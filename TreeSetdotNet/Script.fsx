@@ -338,3 +338,7 @@ match zipSplit (zipTraverse ([],lgTree) "Teukolsky, Saul") with
 | lt, rt -> (treeInorder lt, treeInorder rt)
 
 zipTraverse ([],lgTree) "Teukolsky, Saul"
+
+match splitTree lgTree "Comstock, Anthony" with
+| EmptyTree, EmptyTree -> [], []
+| lt, rt -> (treeInorder lt, treeInorder rt)
