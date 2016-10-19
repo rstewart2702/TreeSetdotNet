@@ -413,13 +413,13 @@ module BalancedBinaryTree =
         | Tree(Datum(k1,_),lc1,rc1) ->
             match s2 with
             | EmptyTree -> s1
-            | Tree(Datum(k2,_),_,_) ->
-                match splitSet s2 k1 with
-                | partL2, sKeyOption, partR2 ->
+            | Tree(Datum(k2,_),lc2,rc2) ->
+                match splitSet s1 k2 with
+                | partL1, sKeyOption, partR1 ->
                     let diffL =
-                        setDifference lc1 partL2
+                        setDifference partL1 lc2
                     let diffR = 
-                        setDifference rc1 partR2
+                        setDifference partR1 rc2
                     match sKeyOption with
                     | None ->
                         concatTrees diffL k1 diffR
