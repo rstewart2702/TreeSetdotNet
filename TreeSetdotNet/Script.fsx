@@ -331,3 +331,10 @@ Tree(Datum ("Walther, C.F.W.",1),
 match zipSplit (zipTraverse ([],lgTree) "Dobbs, Richard") with
 | EmptyTree, EmptyTree -> [], []
 | lt, rt -> (treeInorder lt, treeInorder rt)
+
+
+match zipSplit (zipTraverse ([],lgTree) "Teukolsky, Saul") with
+| EmptyTree, EmptyTree -> [], []
+| lt, rt -> (treeInorder lt, treeInorder rt)
+
+zipTraverse ([],lgTree) "Teukolsky, Saul"
