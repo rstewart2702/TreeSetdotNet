@@ -342,3 +342,40 @@ zipTraverse ([],lgTree) "Teukolsky, Saul"
 match splitTree lgTree "Comstock, Anthony" with
 | EmptyTree, EmptyTree -> [], []
 | lt, rt -> (treeInorder lt, treeInorder rt)
+
+splitSet lgTree "Teukolsky, Saul"
+
+splitSet lgTree "Comstock, Anthony"
+
+let myTree2 =
+    [ "Johns, Harold"; "Michener, James"; "Okasaki, Chris"; "Boswell, James"]
+    |> List.fold btInsert EmptyTree ;;
+
+setUnion lgTree myTree2 ;;
+
+setUnion lgTree myTree2 |> treeInorder ;;
+
+setIntersection lgTree myTree2 |> treeInorder ;;
+
+setDifference myTree2 lgTree |> treeInorder ;;
+setDifference lgTree  myTree2 |> treeInorder ;; 
+
+
+setDifference
+  (Tree(Datum("Boswell, James",0),EmptyTree,EmptyTree))
+  (Tree
+    (Datum ("Khan, Shah Rukh",3),
+    Tree
+        (Datum ("Jackson, Peter",1),
+            Tree (Datum ("Horton, Michael",0),EmptyTree,EmptyTree),
+            Tree (Datum ("Jones, Kerri",0),EmptyTree,EmptyTree)),
+    Tree
+        (Datum ("Lewis, Clive",2),
+        Tree
+            (Datum ("Kuyper, Abraham",1),
+             Tree (Datum ("Knuth, Donald",0),EmptyTree,EmptyTree),
+             Tree (Datum ("Leach, Nora",0),EmptyTree,EmptyTree)),
+             Tree
+               (Datum ("Lewis, Holly",1),EmptyTree,
+                Tree (Datum ("Lin, Zoe",0),EmptyTree,EmptyTree))))) ;;
+
