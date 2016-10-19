@@ -379,3 +379,20 @@ setDifference
                (Datum ("Lewis, Holly",1),EmptyTree,
                 Tree (Datum ("Lin, Zoe",0),EmptyTree,EmptyTree))))) ;;
 
+zipSplitR 
+  EmptyTree EmptyTree
+  ([],(Tree (Datum ("Okasaki, Chris",0),EmptyTree,EmptyTree))) ;;
+
+setDifference 
+  myTree2
+  (Tree(Datum("Boswell, James",0),EmptyTree,EmptyTree)) ;;
+
+setDifference 
+  myTree2
+  (Tree(Datum("Michener, James",0),EmptyTree,EmptyTree)) ;;
+  
+splitSet (Tree(Datum("Boswell, James",0),EmptyTree,EmptyTree)) "Michener, James" 
+
+setDifference myTree2 lgTree |> treeInorder ;;
+
+
