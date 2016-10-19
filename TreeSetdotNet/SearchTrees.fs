@@ -349,14 +349,40 @@ module BalancedBinaryTree =
 
     let zipSplit z =
         match z with
-        | _, EmptyTree -> EmptyTree, EmptyTree
+        // | _, EmptyTree -> EmptyTree, EmptyTree
+        | [], EmptyTree -> EmptyTree, EmptyTree
         | [], Tree(_,flc,frc) ->
             flc, frc
+        //
+        | headZ :: tailZ, EmptyTree ->
+            match headZ with
+            | Left, (Tree(Datum(k,_),_,rc) as newFocusTree) ->
+                let newRSide =
+                    rc
+                zipSplitR EmptyTree newRSide (tailZ, newFocusTree)
+            | Right, (Tree(Datum(k,_),lc,_) as newFocusTree) ->
+                let newLSide =
+                    lc
+                zipSplitR newLSide EmptyTree (tailZ, newFocusTree)
+            | _, EmptyTree ->
+                EmptyTree, EmptyTree
         | headZ :: tailZ , (Tree(_,flc,frc) as focusTree) ->
-            let newFocusTree =
-                match headZ with
-                | _, t -> t
-            zipSplitR flc frc (tailZ, newFocusTree)
+            match headZ with
+            | Left, (Tree(Datum(k,_),_,rc) as newFocusTree) ->
+                let newRSide =
+                    concatTrees frc k rc 
+                zipSplitR flc newRSide (tailZ, newFocusTree)
+            | Right, (Tree(Datum(k,_),lc,_) as newFocusTree) ->
+                let newLSide =
+                    concatTrees lc k flc
+                zipSplitR newLSide frc (tailZ, newFocusTree)
+            | _, EmptyTree ->
+                EmptyTree, EmptyTree
+
+//            let newFocusTree =
+//                | _, t -> t
+//            zipSplitR flc frc (tailZ, newFocusTree)
+
 //        | _, (Tree(_,flc,frc) as focusTree) ->
 //            zipSplitR flc frc z
 
@@ -383,6 +409,11 @@ module BalancedBinaryTree =
             zipTraverse ([],t) k
         zipSplit locZip // EmptyTree EmptyTree
     
+    // Quick-and-dirty functions to provide inorder traversal
+    // of tree structures, so that we may convert a
+    //   'a BalancedSearchTree
+    // into
+    //   'a list
     let flip f x y = f y x
 
     let rec treeInorderR listAcc t =
