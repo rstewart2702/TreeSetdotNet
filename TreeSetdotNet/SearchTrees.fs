@@ -262,18 +262,6 @@ module BalancedBinaryTree =
             match pathHead with
             | (Left|Right), t ->
                 zipperTop (pathTail, t)
-//            zipperTop (pathTail, t)
-//            match pathHead with
-//            | _ , EmptyTree -> [], t
-//            | (Left|Right), t -> zipperTop (pathTail, t)
-
-//        match z with
-//        | [] -> []
-//        | headZ :: tailZ ->
-//            match headZ with
-//            | _, EmptyTree -> z
-//            | NeitherDir, Tree(_,_,_) -> z
-//            | (Left, _) | (Right, _) -> tailZ
 
     let rec zipTraverse z k =
         match z with
@@ -284,20 +272,6 @@ module BalancedBinaryTree =
             elif rk < k then
                 zipTraverse (((Right,root) :: path), rc) k
             else z
-
-//        match z with
-//        | [] -> []
-//        | headZ :: tailZ ->
-//            match headZ with
-//            | _, t ->
-//                match t with
-//                | EmptyTree -> z
-//                | Tree(Datum(dk,_),lc,rc) ->
-//                    if k < dk then
-//                        zipTraverse ((Left,lc)::z) k
-//                    else if dk < k then 
-//                        zipTraverse ((Right,rc)::z) k
-//                    else z
 
     let rec zipperMoveTo z k =
         zipTraverse (zipperTop z) k
@@ -320,36 +294,8 @@ module BalancedBinaryTree =
             | _,     EmptyTree -> 
                 ls, rs
 
-                
-//        match z with
-//        | [] -> ls, rs
-//        | headZ :: tailZ ->
-//            match headZ with
-//            | NeitherDir , t -> ls, rs
-//            | Left , t -> zipSplitR tailZ (concatSets t ls) rs
-//            | Right, t -> zipSplitR tailZ ls (concatSets t rs)
-
-//            let lSplit =
-//                match headZ with
-//                | (NeitherDir|Left), EmptyTree ->
-//                    ls
-//                | (NeitherDir|Left), Tree(_,lc,_) ->
-//                    concatSets lc ls 
-//                | Right, _ ->
-//                    ls
-//            let rSplit =
-//                match headZ with
-//                | (NeitherDir|Right), EmptyTree ->
-//                    rs
-//                | (NeitherDir|Right), Tree(_,_,rc) ->
-//                    concatSets rc rs
-//                | Left, _ ->
-//                    rs
-//            zipSplitR tailZ lSplit rSplit
-
     let zipSplit z =
         match z with
-        // | _, EmptyTree -> EmptyTree, EmptyTree
         | [], EmptyTree -> EmptyTree, EmptyTree
         | [], Tree(_,flc,frc) ->
             flc, frc
@@ -366,7 +312,7 @@ module BalancedBinaryTree =
                 zipSplitR newLSide EmptyTree (tailZ, newFocusTree)
             | _, EmptyTree ->
                 EmptyTree, EmptyTree
-        | headZ :: tailZ , (Tree(_,flc,frc) as focusTree) ->
+        | headZ :: tailZ , Tree(_,flc,frc) ->
             match headZ with
             | Left, (Tree(Datum(k,_),_,rc) as newFocusTree) ->
                 let newRSide =
@@ -378,30 +324,6 @@ module BalancedBinaryTree =
                 zipSplitR newLSide frc (tailZ, newFocusTree)
             | _, EmptyTree ->
                 EmptyTree, EmptyTree
-
-//            let newFocusTree =
-//                | _, t -> t
-//            zipSplitR flc frc (tailZ, newFocusTree)
-
-//        | _, (Tree(_,flc,frc) as focusTree) ->
-//            zipSplitR flc frc z
-
-//            match headZ with
-//            | _, t ->
-//                zipSplitR flc frc (tailZ, t)
-
-//        match z with
-//        | [] -> EmptyTree, EmptyTree
-//        | headZ :: tailZ ->
-//            let lSplit =
-//                match headZ with
-//                | _ , EmptyTree -> EmptyTree
-//                | _ , Tree(_,lc,_) -> lc
-//            let rSplit =
-//                match headZ with
-//                | _ , EmptyTree -> EmptyTree
-//                | _ , Tree(_,_,rc) -> rc
-//            zipSplitR tailZ lSplit rSplit
 
     let rec splitTree t k =
         let locZip = 
