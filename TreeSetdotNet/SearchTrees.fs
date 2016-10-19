@@ -348,6 +348,86 @@ module BalancedBinaryTree =
     let treeInorder t =
         treeInorderR [] t |> List.rev
 
+    let splitSet s k =
+        let locZipper =
+            zipTraverse ([],s) k
+        match locZipper with
+        | [], t ->
+            // the sought-after key is at the root of the tree!
+            match t with
+            | EmptyTree -> 
+                // Shouldn't happen unless s is an EmptyTree to start with?
+                EmptyTree, None, EmptyTree
+            | Tree(Datum(k,_),lc,rc) ->
+                lc, Some k, rc
+        | z, t ->
+            let splitKey =
+                match t with
+                | EmptyTree ->
+                    None
+                | Tree(Datum(k,_),_,_) ->
+                    Some k
+            match zipSplit locZipper with
+            | l, r ->
+                l, splitKey, r
+
+
+    // Set union, via the split/partition function:
+    let rec setUnion s1 s2 =
+        match s1 with
+        | EmptyTree -> s2
+        | Tree(_,_,_) ->
+            match s2 with
+            | EmptyTree -> s1
+            | Tree(Datum(k2,_),lc2,rc2) ->
+                match splitSet s1 k2 with
+                | partL1, _, partR1 ->
+                    let unionL =
+                        setUnion partL1 lc2
+                    let unionR =
+                        setUnion partR1 rc2
+                    concatTrees unionL k2 unionR
+
+    let rec setIntersection s1 s2 =
+        match s1 with
+        | EmptyTree -> EmptyTree
+        | Tree(Datum(k1,_),_,_) ->
+            match s2 with
+            | EmptyTree -> EmptyTree
+            | Tree(Datum(k2,_),lc2,rc2) ->
+                match splitSet s1 k2 with
+                | partL1, sKeyOption, partR1 ->
+                    let intersectL =
+                        setIntersection partL1 lc2
+                    let intersectR = 
+                        setIntersection partR1 rc2
+                    match sKeyOption with
+                    | None ->
+                        concatSets intersectL intersectR
+                    | Some k ->
+                        concatTrees intersectL k intersectR
+
+    let rec setDifference s1 s2 =
+        match s1 with
+        | EmptyTree -> EmptyTree
+        | Tree(Datum(k1,_),lc1,rc1) ->
+            match s2 with
+            | EmptyTree -> s1
+            | Tree(Datum(k2,_),_,_) ->
+                match splitSet s2 k1 with
+                | partL2, sKeyOption, partR2 ->
+                    let diffL =
+                        setDifference lc1 partL2
+                    let diffR = 
+                        setDifference rc1 partR2
+                    match sKeyOption with
+                    | None ->
+                        concatTrees diffL k1 diffR
+                    | Some _ ->
+                        concatSets diffL diffR
+                    
+
+
     (* 
     Need several operations:
     + Create a treeset?

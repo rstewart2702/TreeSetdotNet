@@ -83,6 +83,19 @@ namespace TreeSetdotNet
     val flip : f: ('b -> 'a ->'c) -> x:'a -> y:'b -> 'c
     val treeInorder: t: ('a BalancedSearchTree) -> ('a list)
         when 'a : comparison
+    //
+    val splitSet :
+      s: 'a BalancedSearchTree -> k: 'a -> ('a BalancedSearchTree * 'a option * 'a BalancedSearchTree) 
+        when 'a: comparison
+    val setUnion :
+      s1: 'a BalancedSearchTree -> s2: 'a BalancedSearchTree -> 'a BalancedSearchTree
+        when 'a: comparison
+    val setIntersection :
+      s1: 'a BalancedSearchTree -> s2: 'a BalancedSearchTree -> 'a BalancedSearchTree
+        when 'a: comparison
+    val setDifference :
+      s1: 'a BalancedSearchTree -> s2: 'a BalancedSearchTree -> 'a BalancedSearchTree
+        when 'a: comparison
   end
 
 
