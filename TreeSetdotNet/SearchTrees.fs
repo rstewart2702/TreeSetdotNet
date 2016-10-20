@@ -200,35 +200,71 @@ module BalancedBinaryTree =
         // and the key ranges of the two trees DO *NOT* OVERLAP.
         // If the trees' key ranges do overlap, then this function
         // will not correctly concatenate the sets together!
+        // 
+        // Herein, the recursion is intended to reduce the height
+        // of the lt, until the evaluation comes to a right-spine
+        // subtree of the lt which has height equal to or less than
+        // the height or the rt.
         match lt, rt with
-        | EmptyTree, EmptyTree ->   Tree(Datum(x,0),EmptyTree,EmptyTree)
-        | EmptyTree, Tree(_,_,_) -> Tree(Datum(x,1),EmptyTree,rt)
-        | Tree(_,_,_), EmptyTree -> Tree(Datum(x,1),lt,EmptyTree)
-        | Tree(Datum(dl,hl),lcOfLt,rcOfLt), Tree(Datum(_,hr),_,_) ->
-            if hl > hr then
-                let newRt =
+        | EmptyTree,                       EmptyTree -> 
+            Tree(Datum(x,0),lt,rt)
+        | Tree(Datum(dl,0),_,_),           EmptyTree -> 
+            Tree(Datum(dl,1),
+                 EmptyTree,
+                 Tree(Datum(x,0),EmptyTree,EmptyTree))
+        | Tree(Datum(dl,hl),lcOfLt,rcOfLt), _        ->
+            if (hl) > (tHeight rt) then
+                let newRt = 
                     rightConcat rcOfLt x rt
                 rebalance (
-                    Tree(Datum(dl, (max (tHeight lcOfLt) (tHeight newRt))+1),lcOfLt,newRt)
-                )
-            else // if hl <= hr then
-                // hr - hl <= 1, correct?  This HAS to be the case, correct?
-                Tree(Datum(x,(max hl hr)+1),lt,rt)
-
-    let rec leftConcat lt x rt =
-        match lt, rt with
-        | EmptyTree, EmptyTree ->   Tree(Datum(x,0),EmptyTree,EmptyTree)
-        | EmptyTree, Tree(_,_,_) -> Tree(Datum(x,1),EmptyTree,rt)
-        | Tree(_,_,_), EmptyTree -> Tree(Datum(x,1),lt,EmptyTree)
-        | Tree(Datum(_,hl),_,_), Tree(Datum(dr,hr),lcOfRt,rcOfRt) ->
-            if hl < hr then
-                let newLt = 
-                    leftConcat lt x lcOfRt
-                rebalance (
-                    Tree(Datum(dr,(max (tHeight newLt) (tHeight rcOfRt))+1),newLt,rcOfRt)
+                    Tree(Datum(dl, (max (tHeight lcOfLt) (tHeight newRt))+1),
+                         lcOfLt,
+                         newRt)
                 )
             else
-                Tree(Datum(x,(max hl hr)+1),lt,rt)
+                Tree(Datum(x,(max (tHeight lt) (tHeight rt))+1),lt,rt) 
+        | _, _ ->
+            failwith "rightConcat:  pattern matching failed!!!"
+
+    let rec leftConcat lt x rt =
+        // Herein, the recursion is intended to reduce the height
+        // of the rt, until the evaluation comes to a left-spine
+        // subtree of the rt which has height equal to or less than
+        // the height of the lt.
+        match lt, rt with
+        | EmptyTree,                       EmptyTree             -> 
+            Tree(Datum(x,0),EmptyTree,EmptyTree)
+        | EmptyTree,                       Tree(Datum(dr,0),_,_) ->
+            Tree(Datum(dr,1),
+                 Tree(Datum(x,0),EmptyTree,EmptyTree),
+                 EmptyTree)
+        | _,                               Tree(Datum(dr,hr),lcOfRt,rcOfRt) ->
+            if (tHeight lt) < hr then
+                let newLt =
+                    leftConcat lt x lcOfRt
+                rebalance (
+                    Tree(Datum(x,(max (tHeight newLt) (tHeight rcOfRt))+1),
+                         newLt,
+                         rcOfRt)
+                )
+            else
+                Tree(Datum(x,(max (tHeight lt) (tHeight rt))+1),lt,rt)
+        | _, _ ->
+            failwith "leftConcat:  pattern matching failed!!!"
+
+//        match lt, rt with
+//        | EmptyTree, EmptyTree ->   Tree(Datum(x,0),EmptyTree,EmptyTree)
+//        | EmptyTree, Tree(_,_,_) -> Tree(Datum(x,1),EmptyTree,rt)
+//        | Tree(_,_,_), EmptyTree -> Tree(Datum(x,1),lt,EmptyTree)
+//        | Tree(Datum(_,hl),_,_), Tree(Datum(dr,hr),lcOfRt,rcOfRt) ->
+//            if hl < hr then
+//                let newLt = 
+//                    leftConcat lt x lcOfRt
+//                rebalance (
+//                    Tree(Datum(dr,(max (tHeight newLt) (tHeight rcOfRt))+1),newLt,rcOfRt)
+//                )
+//            else
+//                Tree(Datum(x,(max hl hr)+1),lt,rt)
 
     let concatTrees lt x rt =
         if (tHeight lt) < (tHeight rt) then leftConcat lt x rt
