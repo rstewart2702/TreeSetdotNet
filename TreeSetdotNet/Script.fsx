@@ -393,6 +393,146 @@ setDifference
   
 splitSet (Tree(Datum("Boswell, James",0),EmptyTree,EmptyTree)) "Michener, James" 
 
+// THE BIG TEST, THUS FAR:
 setDifference myTree2 lgTree |> treeInorder ;;
 
+setDifference 
+  (Tree
+     (Datum ("Franklin, Regena",5),
+      Tree
+        (Datum ("Cotillard, Marion",4),
+         Tree
+           (Datum ("Bowers, Richard",3),
+            Tree
+              (Datum ("Bennett, Matthew",2),
+               Tree
+                 (Datum ("Bailey, Tom",1),
+                  Tree (Datum ("Austen, Jane",0),EmptyTree,EmptyTree),
+                  Tree (Datum ("Barnett, Matthew",0),EmptyTree,EmptyTree)),
+               Tree (Datum ("Bessemer, Henry",0),EmptyTree,EmptyTree)),
+            Tree
+              (Datum ("Chisman, Kerry",2),
+               Tree
+                 (Datum ("Casali, Roy",1),
+                  Tree (Datum ("Camp, Colleen",0),EmptyTree,EmptyTree),
+                  EmptyTree),
+               Tree (Datum ("Clancy, Scot",0),EmptyTree,EmptyTree))),
+         Tree
+           (Datum ("Dobbs, Richard",3),
+            Tree
+              (Datum ("Desmond, Charles",2),
+               Tree
+                 (Datum ("De Vargas, Juan",1),EmptyTree,
+                  Tree (Datum ("DeRama, Peter",0),EmptyTree,EmptyTree)),
+               Tree (Datum ("Dijkstra, Edsger",0),EmptyTree,EmptyTree)),
+            Tree
+              (Datum ("Flannery, William",2),
+               Tree
+                 (Datum ("Evers, David",1),
+                  Tree (Datum ("Ellison, Harlan",0),EmptyTree,EmptyTree),
+                  Tree (Datum ("Ferrell, Will",0),EmptyTree,EmptyTree)),
+               Tree
+                 (Datum ("Ford, Matthew",1),EmptyTree,
+                  Tree (Datum ("Frame, John",0),EmptyTree,EmptyTree))))),
+      Tree
+        (Datum ("Holmes, Katie",4),
+         Tree
+           (Datum ("Gavrilovich, Pavel",2),
+            Tree (Datum ("Gaddis, Calvin",0),EmptyTree,EmptyTree),
+            Tree
+              (Datum ("Harkness, Jack",1),
+               Tree (Datum ("Hardy, Tom",0),EmptyTree,EmptyTree),EmptyTree)),
+         Tree
+           (Datum ("Lewis, Clive",3),
+            Tree
+              (Datum ("Khan, Shah Rukh",2),
+               Tree
+                 (Datum ("Jackson, Peter",1),
+                  Tree (Datum ("Horton, Michael",0),EmptyTree,EmptyTree),
+                  Tree (Datum ("Jones, Kerri",0),EmptyTree,EmptyTree)),
+               Tree
+                 (Datum ("Kuyper, Abraham",1),
+                  Tree (Datum ("Knuth, Donald",0),EmptyTree,EmptyTree),
+                  Tree (Datum ("Leach, Nora",0),EmptyTree,EmptyTree))),
+            Tree
+              (Datum ("Martin, Chris",2),
+               Tree
+                 (Datum ("Lewis, Holly",1),EmptyTree,
+                  Tree (Datum ("Lin, Zoe",0),EmptyTree,EmptyTree)),
+               Tree
+                 (Datum ("McClinton, Rebecca",1),
+                  Tree
+                    (Datum ("May, Parker",1),
+                     Tree (Datum ("Marvinson, Gus",0),EmptyTree,EmptyTree),
+                     Tree (Datum ("McBride, Martina",0),EmptyTree,EmptyTree)),
+                  EmptyTree))))) )
+  (lChild myTree2)
 
+let lgTreeL1 = lChild lgTree
+
+
+match splitSet lgTree "Michener, James" with
+| l, k, r -> l |> treeInorder, k, r |> treeInorder
+
+splitSet 
+      (Tree
+        (Datum ("Cotillard, Marion",4),
+         Tree
+           (Datum ("Bowers, Richard",3),
+            Tree
+              (Datum ("Bennett, Matthew",2),
+               Tree
+                 (Datum ("Bailey, Tom",1),
+                  Tree (Datum ("Austen, Jane",0),EmptyTree,EmptyTree),
+                  Tree (Datum ("Barnett, Matthew",0),EmptyTree,EmptyTree)),
+               Tree (Datum ("Bessemer, Henry",0),EmptyTree,EmptyTree)),
+            Tree
+              (Datum ("Chisman, Kerry",2),
+               Tree
+                 (Datum ("Casali, Roy",1),
+                  Tree (Datum ("Camp, Colleen",0),EmptyTree,EmptyTree),
+                  EmptyTree),
+               Tree (Datum ("Clancy, Scot",0),EmptyTree,EmptyTree))),
+         Tree
+           (Datum ("Dobbs, Richard",3),
+            Tree
+              (Datum ("Desmond, Charles",2),
+               Tree
+                 (Datum ("De Vargas, Juan",1),EmptyTree,
+                  Tree (Datum ("DeRama, Peter",0),EmptyTree,EmptyTree)),
+               Tree (Datum ("Dijkstra, Edsger",0),EmptyTree,EmptyTree)),
+            Tree
+              (Datum ("Flannery, William",2),
+               Tree
+                 (Datum ("Evers, David",1),
+                  Tree (Datum ("Ellison, Harlan",0),EmptyTree,EmptyTree),
+                  Tree (Datum ("Ferrell, Will",0),EmptyTree,EmptyTree)),
+               Tree
+                 (Datum ("Ford, Matthew",1),EmptyTree,
+                  Tree (Datum ("Frame, John",0),EmptyTree,EmptyTree))))) )
+  "Johns, Harold"
+
+
+
+let lgTree1 = 
+    match splitTree lgTree "Fuss, David" with
+    | lt, rt -> lt
+
+
+setDifference myTree2 lgTree1
+let lgTree2 =
+  (lgTree1 |> rChild |> rChild)
+
+lgTree2 |> (setDifference myTree2 )
+
+
+splitSet myTree2 "Cotillard, Marion"
+
+zipTraverse ([],myTree2) "Cotillard, Marion" 
+
+(zipTraverse ([],myTree2) "Cotillard, Marion" ) |> zipSplit
+
+
+
+setUnion lgTree2 myTree2 ;;
+setUnion myTree2 lgTree2;;
