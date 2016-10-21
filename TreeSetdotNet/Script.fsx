@@ -220,6 +220,13 @@ let lgTree =
     "Steele, Guy L" ;
     ] |> List.fold btInsert EmptyTree ;;
 
+let lgTree1 = 
+    match splitTree lgTree "Fuss, David" with
+    | lt, rt -> lt
+
+match splitTree lgTree "Fuss, Dvaid" with
+| ls, rs -> treeInorder ls, treeInorder rs
+
 
 
 match (splitTree lgTree "Nolan, Christopher") with
@@ -514,9 +521,8 @@ splitSet
 
 
 
-let lgTree1 = 
-    match splitTree lgTree "Fuss, David" with
-    | lt, rt -> lt
+
+
 
 
 setDifference myTree2 lgTree1
@@ -536,3 +542,85 @@ zipTraverse ([],myTree2) "Cotillard, Marion"
 
 setUnion lgTree2 myTree2 ;;
 setUnion myTree2 lgTree2;;
+
+
+zipTraverse ([],myTree2) "Flannery, William"
+
+match zipTraverse ([],myTree2) "Flannery, William" with
+| headZ :: tailZ, EmptyTree ->
+    match headZ with
+    | Right, (Tree(Datum(k,_),lc,_) as nft) ->
+        lc, (tailZ, nft),
+
+zipTraverse ([],myTree2) "Flannery, William" |> zipSplit
+
+
+zipTraverse ([],myTree2) "Flannery, William" 
+
+zipSplitR
+    (Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree))
+    EmptyTree
+    ([(Left,
+        Tree
+         (Datum ("Johns, Harold",1),
+          Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree));
+      (Left,
+       Tree
+         (Datum ("Michener, James",2),
+          Tree
+           (Datum ("Johns, Harold",1),
+            Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree),
+          Tree (Datum ("Okasaki, Chris",0),EmptyTree,EmptyTree)))],
+       (Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree))) ;;
+
+zipSplitR 
+    EmptyTree 
+    EmptyTree
+    ([(Left,
+       Tree
+        (Datum ("Johns, Harold",1),
+         Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree));
+      (Left,
+       Tree
+         (Datum ("Michener, James",2),
+          Tree
+            (Datum ("Johns, Harold",1),
+             Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree),
+           Tree (Datum ("Okasaki, Chris",0),EmptyTree,EmptyTree)))],
+     Tree(Datum("Boswell, James",0),EmptyTree,EmptyTree) )
+
+concatTrees 
+    EmptyTree
+    "Boswell, James"
+    EmptyTree ;;
+
+zipSplitR
+    EmptyTree
+    (Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree))
+    ([
+      (Left,
+       Tree
+         (Datum ("Michener, James",2),
+          Tree
+            (Datum ("Johns, Harold",1),
+             Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree),
+           Tree (Datum ("Okasaki, Chris",0),EmptyTree,EmptyTree)))],
+      Tree
+        (Datum ("Johns, Harold",1),
+         Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree) )
+
+zipSplitR'
+    EmptyTree 
+    EmptyTree
+    ([(Left,
+       Tree
+        (Datum ("Johns, Harold",1),
+         Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree));
+      (Left,
+       Tree
+         (Datum ("Michener, James",2),
+          Tree
+            (Datum ("Johns, Harold",1),
+             Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree),
+           Tree (Datum ("Okasaki, Chris",0),EmptyTree,EmptyTree)))],
+     Tree(Datum("Boswell, James",0),EmptyTree,EmptyTree) )
