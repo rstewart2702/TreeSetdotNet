@@ -212,8 +212,8 @@ module BalancedBinaryTree =
             Tree(Datum(dl,1),
                  EmptyTree,
                  Tree(Datum(x,0),EmptyTree,EmptyTree))
-        | Tree(Datum(dl,hl),lcOfLt,rcOfLt), _        ->
-            if (hl) > (tHeight rt) then
+        | Tree(Datum(dl,h),lcOfLt,rcOfLt), _        ->
+            if (h) > (tHeight rt) then
                 let newRt = 
                     rightConcat rcOfLt x rt
                 rebalance (
@@ -223,6 +223,13 @@ module BalancedBinaryTree =
                 )
             else
                 Tree(Datum(x,(max (tHeight lt) (tHeight rt))+1),lt,rt) 
+        | EmptyTree, Tree(Datum(rk,0),EmptyTree,EmptyTree) ->
+            // If the height of the left tree has gone down to -1,
+            // then we must have fallen off the tree in the process
+            // of trying to get to a shorter right-spine subtree.
+            // This means that we have reached the shortest possible
+            // right-spine subtree!
+            Tree(Datum(x,1),EmptyTree,rt)
         | _, _ ->
             failwith "rightConcat:  pattern matching failed!!!"
 
@@ -243,28 +250,18 @@ module BalancedBinaryTree =
                 let newLt =
                     leftConcat lt x lcOfRt
                 rebalance (
-                    Tree(Datum(x,(max (tHeight newLt) (tHeight rcOfRt))+1),
+                    Tree(Datum(dr,(max (tHeight newLt) (tHeight rcOfRt))+1),
                          newLt,
                          rcOfRt)
                 )
             else
                 Tree(Datum(x,(max (tHeight lt) (tHeight rt))+1),lt,rt)
-        | _, _ ->
+        | Tree(Datum(lk,0),EmptyTree,EmptyTree), EmptyTree ->
+            // height of the right tree has "gone negative,"
+            // which means we must return the left tree:
+            Tree(Datum(x,1),lt,EmptyTree)
+        | _,  _ ->
             failwith "leftConcat:  pattern matching failed!!!"
-
-//        match lt, rt with
-//        | EmptyTree, EmptyTree ->   Tree(Datum(x,0),EmptyTree,EmptyTree)
-//        | EmptyTree, Tree(_,_,_) -> Tree(Datum(x,1),EmptyTree,rt)
-//        | Tree(_,_,_), EmptyTree -> Tree(Datum(x,1),lt,EmptyTree)
-//        | Tree(Datum(_,hl),_,_), Tree(Datum(dr,hr),lcOfRt,rcOfRt) ->
-//            if hl < hr then
-//                let newLt = 
-//                    leftConcat lt x lcOfRt
-//                rebalance (
-//                    Tree(Datum(dr,(max (tHeight newLt) (tHeight rcOfRt))+1),newLt,rcOfRt)
-//                )
-//            else
-//                Tree(Datum(x,(max hl hr)+1),lt,rt)
 
     let concatTrees lt x rt =
         if (tHeight lt) < (tHeight rt) then leftConcat lt x rt
@@ -313,53 +310,65 @@ module BalancedBinaryTree =
         zipTraverse (zipperTop z) k
 
     let rec zipSplitR ls rs z =
-        match z with
-        | [], _ -> ls, rs
-        | headZ :: tailZ, focusTree ->
+        match z with 
+        | [], _ -> ls , rs
+        | headZ :: tailZ, (Tree(Datum(fk,_),flc,frc) as focusTree) ->
             match headZ with
-            | Left,  (Tree(Datum(k,_), _, rc) as t) -> 
-                zipSplitR 
-                  ls
-                  (concatTrees rs k rc)
-                  (tailZ , t)
-            | Right, (Tree(Datum(k,_), lc, _) as t) ->
-                zipSplitR 
-                  (concatTrees lc k ls)
-                  rs
-                  (tailZ , t)
-            | _,     EmptyTree -> 
-                ls, rs
+            | Left, (Tree(Datum(dk,_),dlc,drc) as ptOfDeparture) ->
+                zipSplitR
+                    ls
+                    // (concatTrees drc dk rs)
+                    (concatTrees rs dk drc)
+                    (tailZ, ptOfDeparture)
+            | Right, (Tree(Datum(dk,_),dlc,drc) as ptOfDeparture) ->
+                zipSplitR
+                    // (concatTrees ls dk dlc)
+                    (concatTrees dlc dk ls)
+                    rs
+                    (tailZ, ptOfDeparture)
+            | _,    EmptyTree ->
+                failwith "zipSplitR:  impossible pattern in zipper head?"
+        | _, EmptyTree -> 
+            failwith "zipSplitR:  impossible pattern in zipper?"
 
     let zipSplit z =
         match z with
         | [], EmptyTree -> EmptyTree, EmptyTree
         | [], Tree(_,flc,frc) ->
-            flc, frc
+            flc,frc
         //
         | headZ :: tailZ, EmptyTree ->
+            // The zipper traversal fell off the tree, i.e., the sought-after key
+            // did not exist in the set:
             match headZ with
-            | Left, (Tree(Datum(k,_),_,rc) as newFocusTree) ->
-                let newRSide =
-                    rc
-                zipSplitR EmptyTree newRSide (tailZ, newFocusTree)
-            | Right, (Tree(Datum(k,_),lc,_) as newFocusTree) ->
-                let newLSide =
-                    lc
-                zipSplitR newLSide EmptyTree (tailZ, newFocusTree)
+            | Left, (Tree(Datum(dk,_),_,rc) as ptOfDeparture) ->
+                zipSplitR
+                    EmptyTree  // i.e., we fell off, to left of, the dk key
+                    // (concatTrees rc dk EmptyTree)
+                    (concatTrees EmptyTree dk rc)
+                    (tailZ, ptOfDeparture)
+            | Right, (Tree(Datum(dk,_),lc,_) as ptOfDeparture) ->
+                zipSplitR
+                    // (concatTrees EmptyTree dk lc)
+                    (concatTrees lc dk EmptyTree)
+                    EmptyTree
+                    (tailZ, ptOfDeparture)
             | _, EmptyTree ->
-                EmptyTree, EmptyTree
-        | headZ :: tailZ , Tree(_,flc,frc) ->
+                failwith "zipSplit:  impossible pattern in zipper head, left the tree."
+        | headZ :: tailZ, (Tree(Datum(fk,_),flc,frc) as currentFocus) ->
             match headZ with
-            | Left, (Tree(Datum(k,_),_,rc) as newFocusTree) ->
-                let newRSide =
-                    concatTrees frc k rc 
-                zipSplitR flc newRSide (tailZ, newFocusTree)
-            | Right, (Tree(Datum(k,_),lc,_) as newFocusTree) ->
-                let newLSide =
-                    concatTrees lc k flc
-                zipSplitR newLSide frc (tailZ, newFocusTree)
+            | Left, (Tree(Datum(dk,_),_,rc) as ptOfDeparture) ->
+                zipSplitR
+                    flc
+                    (concatTrees frc dk rc)
+                    (tailZ, ptOfDeparture)
+            | Right, (Tree(Datum(dk,_),lc,_) as ptOfDeparture) ->
+                zipSplitR
+                    (concatTrees lc dk flc)
+                    frc
+                    (tailZ, ptOfDeparture)
             | _, EmptyTree ->
-                EmptyTree, EmptyTree
+                failwith "zipSplit:  impossible pattern in zipper head, stayed inside the tree."
 
     let rec splitTree t k =
         let locZip = 
@@ -374,7 +383,7 @@ module BalancedBinaryTree =
     //   'a list
     let flip f x y = f y x
 
-    let rec treeInorderR listAcc t =
+    let rec treeInorderR listAcc t =    
         match t with
         | EmptyTree -> listAcc
         | Tree(Datum(dk,_),lc,rc) ->
