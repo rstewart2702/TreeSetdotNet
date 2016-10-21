@@ -355,7 +355,9 @@ splitSet lgTree "Teukolsky, Saul"
 splitSet lgTree "Comstock, Anthony"
 
 let myTree2 =
-    [ "Johns, Harold"; "Michener, James"; "Okasaki, Chris"; "Boswell, James"]
+    [ "Johns, Harold"; "Michener, James"; "Okasaki, Chris"; 
+     "Yee, Soo Jean";
+    "Boswell, James"]
     |> List.fold btInsert EmptyTree ;;
 
 setUnion lgTree myTree2 ;;
@@ -366,6 +368,7 @@ setIntersection lgTree myTree2 |> treeInorder ;;
 
 setDifference myTree2 lgTree |> treeInorder ;;
 setDifference lgTree  myTree2 |> treeInorder ;; 
+
 
 
 setDifference
