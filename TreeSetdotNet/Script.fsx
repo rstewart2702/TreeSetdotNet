@@ -627,3 +627,17 @@ zipSplitR'
              Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree),
            Tree (Datum ("Okasaki, Chris",0),EmptyTree,EmptyTree)))],
      Tree(Datum("Boswell, James",0),EmptyTree,EmptyTree) )
+
+
+let lgTree3 =
+  lgTree |> rChild |> lChild ;;
+lgTree3 |> treeInorder ;;
+lgTree |> treeInorder ;;
+setDifference lgTree lgTree3 |> treeInorder ;;
+
+myTree2 |> setUnion lgTree3 |> setDifference lgTree |> treeInorder 
+
+(* 
+I wonder what it would take to integrate this thing into Linq,
+and use it from C#?
+*)
