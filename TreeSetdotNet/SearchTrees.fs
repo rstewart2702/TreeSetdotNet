@@ -465,11 +465,7 @@ module BalancedBinaryTree =
                         setDifference partL1 lc2
                     let diffR = 
                         setDifference partR1 rc2
-                    match sKeyOption with
-                    | None ->
-                        concatTrees diffL k1 diffR
-                    | Some _ ->
-                        concatSets diffL diffR
+                    concatSets diffL diffR
                     
 
 
