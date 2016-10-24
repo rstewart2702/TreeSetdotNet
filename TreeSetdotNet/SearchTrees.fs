@@ -341,32 +341,48 @@ module BalancedBinaryTree =
             // The zipper traversal fell off the tree, i.e., the sought-after key
             // did not exist in the set:
             match headZ with
-            | Left, (Tree(Datum(dk,_),_,rc) as ptOfDeparture) ->
+            | Left, (Tree(Datum(dk,_),_,rc) as ptOfOrigin) ->
+                // ordering of the subtrees:
+                //   EmptyTree (aka "currentFocus")
+                //   dk
+                //   rc (which is to the right of the key which is in the origin tree)
                 zipSplitR
                     EmptyTree  // i.e., we fell off, to left of, the dk key
                     // (concatTrees rc dk EmptyTree)
                     (concatTrees EmptyTree dk rc)
-                    (tailZ, ptOfDeparture)
-            | Right, (Tree(Datum(dk,_),lc,_) as ptOfDeparture) ->
+                    (tailZ, ptOfOrigin)
+            | Right, (Tree(Datum(dk,_),lc,_) as ptOfOrigin) ->
+                // ordering of the subtrees:
+                //   lc (which is to the left of the key which is in the origin tree)
+                //   dk
+                //   EmptyTree (aka "currentFocus")
                 zipSplitR
                     // (concatTrees EmptyTree dk lc)
                     (concatTrees lc dk EmptyTree)
                     EmptyTree
-                    (tailZ, ptOfDeparture)
+                    (tailZ, ptOfOrigin)
             | _, EmptyTree ->
                 failwith "zipSplit:  impossible pattern in zipper head, left the tree."
         | headZ :: tailZ, (Tree(Datum(fk,_),flc,frc) as currentFocus) ->
             match headZ with
-            | Left, (Tree(Datum(dk,_),_,rc) as ptOfDeparture) ->
+            | Left, (Tree(Datum(dk,_),_,rc) as ptOfOrigin) ->
+                // ordering of the subtrees:
+                //   frc (contribution of the currentFocus to the right-hand partition)
+                //   dk
+                //   rc (which is to the right of all of the keys in the focus)
                 zipSplitR
                     flc
                     (concatTrees frc dk rc)
-                    (tailZ, ptOfDeparture)
-            | Right, (Tree(Datum(dk,_),lc,_) as ptOfDeparture) ->
+                    (tailZ, ptOfOrigin)
+            | Right, (Tree(Datum(dk,_),lc,_) as ptOfOrigin) ->
+                // ordering of the subtrees:
+                //   lc (which is to the left of all of the keys in the focus)
+                //   dk
+                //   frc (contribution of the currentFocus to the left-hand partition)
                 zipSplitR
                     (concatTrees lc dk flc)
                     frc
-                    (tailZ, ptOfDeparture)
+                    (tailZ, ptOfOrigin)
             | _, EmptyTree ->
                 failwith "zipSplit:  impossible pattern in zipper head, stayed inside the tree."
 
