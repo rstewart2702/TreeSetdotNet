@@ -636,6 +636,9 @@ lgTree |> treeInorder ;;
 setDifference lgTree lgTree3 |> treeInorder ;;
 
 myTree2 |> setUnion lgTree3 |> setDifference lgTree |> treeInorder 
+myTree2 |> treeInorder
+lgTree3 |> treeInorder
+myTree2 |> setUnion lgTree3 |> treeInorder
 
 (* 
 I wonder what it would take to integrate this thing into Linq,
