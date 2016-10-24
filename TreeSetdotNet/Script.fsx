@@ -634,6 +634,10 @@ let lgTree3 =
 lgTree3 |> treeInorder ;;
 lgTree |> treeInorder ;;
 setDifference lgTree lgTree3 |> treeInorder ;;
+setDifference lgTree3 lgTree |> treeInorder ;;
+setIntersection lgTree3 lgTree |> treeInorder ;;
+(setIntersection lgTree3 lgTree |> treeInorder) = (lgTree3 |> treeInorder) ;;
+
 
 myTree2 |> setUnion lgTree3 |> setDifference lgTree |> treeInorder 
 myTree2 |> treeInorder
