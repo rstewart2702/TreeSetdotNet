@@ -99,6 +99,8 @@ namespace TreeSetdotNet
     //
     val zipSuccessor :
       z: 'K BSTZipper -> 'K BSTZipper
+    val zipPredecessor :
+      z: 'K BSTZipper -> 'K BSTZipper
   end
 
 

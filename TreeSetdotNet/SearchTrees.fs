@@ -505,7 +505,7 @@ module BalancedBinaryTree =
         | _,_ ->
             failwith "zipDown:  impossible case reached?"
 
-    let zipSuccessor z =
+    let rec zipSuccessor z =
         match z with
         | pathList, (Tree(_,_,(Tree(_,_,_) as rc)) as cf) ->
             (((Right, cf) :: pathList), rc) |>
@@ -515,11 +515,22 @@ module BalancedBinaryTree =
         // exist in the tree in the first place:
         | _, EmptyTree ->
             zipAscend z Left |>
-            zipDown Left
+            zipSuccessor 
+            // zipDown Left
         | pathList, Tree(_,_,EmptyTree) ->
             zipAscend z Left 
         
-
+    let rec zipPredecessor z =
+        match z with
+        | pathList, (Tree(_,(Tree(_,_,_) as lc),_) as cf) ->
+            (((Left, cf) :: pathList), lc) |>
+            zipDown Right
+        | _, EmptyTree ->
+            zipAscend z Right |>
+            zipPredecessor
+            // zipDown Right
+        | pathList, Tree(_,EmptyTree,_) ->
+            zipAscend z Right
 
 
     (* 
