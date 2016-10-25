@@ -233,6 +233,29 @@ module BalancedBinaryTree =
         | _, _ ->
             failwith "rightConcat:  pattern matching failed!!!"
 
+    let keyOf t =
+        match t with
+        | Tree(Datum(k,_),_,_) -> Some k
+        | _ -> None
+
+    let rec rightConcat' lt x rt =
+        if (tHeight lt) > (tHeight rt) then
+            let rootKey =
+                match keyOf lt with
+                | Some k -> k
+                | None -> failwith "rightConcat:  Impossible for lt = EmptyTree, yet it was so!"
+            let newRt = 
+                rightConcat' (rChild lt) x rt
+            rebalance (
+                Tree(Datum(rootKey,(max (tHeight (lChild lt)) (tHeight newRt))+1),
+                     (lChild lt),
+                     newRt)
+            )
+        else
+            Tree(Datum(x,(max (tHeight lt) (tHeight rt))+1),
+                 lt,
+                 rt)
+
     let rec leftConcat lt x rt =
         // Herein, the recursion is intended to reduce the height
         // of the rt, until the evaluation comes to a left-spine
