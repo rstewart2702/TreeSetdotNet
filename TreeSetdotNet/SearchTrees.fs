@@ -505,6 +505,16 @@ module BalancedBinaryTree =
         | _,_ ->
             failwith "zipDown:  impossible case reached?"
 
+    // "Cursor" functions:
+    // Turns out that if a traversal "falls off" the tree
+    // because a search asked for a missing key, the
+    // path stored in the zipper allows us to move back into
+    // the tree properly, i.e., it's possible to calculate 
+    // the zipper of the successor of that missing key!
+    //
+    // Which way one falls off the tree determines how to 
+    // compute the successor and predecessor, in each case.
+    // It really does matter quite a lot!
     let rec zipSuccessor z =
         match z with
         | pathList, (Tree(_,_,(Tree(_,_,_) as rc)) as cf) ->
@@ -513,24 +523,30 @@ module BalancedBinaryTree =
         // The only way the following case arises is if the zipper
         // happens to have been calculated for a key that didn't 
         // exist in the tree in the first place:
-        | _, EmptyTree ->
+        | (Left, t) :: tailZ, EmptyTree ->
+            tailZ, t
+        | (Right, t) :: tailZ, EmptyTree ->
             zipAscend z Left |>
-            zipSuccessor 
-            // zipDown Left
+            zipSuccessor
         | pathList, Tree(_,_,EmptyTree) ->
             zipAscend z Left 
+        | [], EmptyTree ->
+            failwith "zipSuccessor:  impossible zipper."
         
     let rec zipPredecessor z =
         match z with
         | pathList, (Tree(_,(Tree(_,_,_) as lc),_) as cf) ->
             (((Left, cf) :: pathList), lc) |>
             zipDown Right
-        | _, EmptyTree ->
+        | (Left, t) :: tailZ, EmptyTree ->
             zipAscend z Right |>
             zipPredecessor
-            // zipDown Right
+        | (Right, t) :: tailZ, EmptyTree ->
+            tailZ, t
         | pathList, Tree(_,EmptyTree,_) ->
             zipAscend z Right
+        | [], EmptyTree -> 
+            failwith "zipPredecessor:  impossible zipper."
 
 
     (* 
