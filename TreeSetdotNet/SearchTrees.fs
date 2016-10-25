@@ -526,8 +526,7 @@ module BalancedBinaryTree =
         | (Left, t) :: tailZ, EmptyTree ->
             tailZ, t
         | (Right, t) :: tailZ, EmptyTree ->
-            zipAscend z Left |>
-            zipSuccessor
+            zipAscend z Left 
         | pathList, Tree(_,_,EmptyTree) ->
             zipAscend z Left 
         | [], EmptyTree ->
@@ -539,8 +538,7 @@ module BalancedBinaryTree =
             (((Left, cf) :: pathList), lc) |>
             zipDown Right
         | (Left, t) :: tailZ, EmptyTree ->
-            zipAscend z Right |>
-            zipPredecessor
+            zipAscend z Right 
         | (Right, t) :: tailZ, EmptyTree ->
             tailZ, t
         | pathList, Tree(_,EmptyTree,_) ->
