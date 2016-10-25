@@ -96,6 +96,9 @@ namespace TreeSetdotNet
     val setDifference :
       s1: 'a BalancedSearchTree -> s2: 'a BalancedSearchTree -> 'a BalancedSearchTree
         when 'a: comparison
+    //
+    val zipSuccessor :
+      z: 'K BSTZipper -> 'K BSTZipper
   end
 
 

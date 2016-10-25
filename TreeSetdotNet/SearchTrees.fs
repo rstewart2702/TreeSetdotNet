@@ -483,6 +483,43 @@ module BalancedBinaryTree =
                         setDifference partR1 rc2
                     concatSets diffL diffR
                     
+    let rec zipAscend z dir =
+        match z with
+        | [], t -> z
+        | (pDir, t) :: tailZ, cf ->
+            if pDir = dir then
+                tailZ, t
+            else
+                zipAscend (tailZ, t) dir
+    
+    let rec zipDown dir z =
+        match z, dir with
+        | (pathList, (Tree(_,(Tree(_,_,_) as lc),_) as cf)), Left ->
+            zipDown dir ((Left,cf)::pathList, lc)
+        | (pathList, Tree(_,EmptyTree,_)),                   Left ->
+            z
+        | (pathList, (Tree(_,_,(Tree(_,_,_) as rc)) as cf)), Right ->
+            zipDown dir ((Right,cf)::pathList, rc) 
+        | (pathList, Tree(_,_,EmptyTree)),                   Right ->
+            z
+        | _,_ ->
+            failwith "zipDown:  impossible case reached?"
+
+    let zipSuccessor z =
+        match z with
+        | pathList, (Tree(_,_,(Tree(_,_,_) as rc)) as cf) ->
+            (((Right, cf) :: pathList), rc) |>
+            zipDown Left 
+        // The only way the following case arises is if the zipper
+        // happens to have been calculated for a key that didn't 
+        // exist in the tree in the first place:
+        | _, EmptyTree ->
+            zipAscend z Left |>
+            zipDown Left
+        | pathList, Tree(_,_,EmptyTree) ->
+            zipAscend z Left 
+        
+
 
 
     (* 
