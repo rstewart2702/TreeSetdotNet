@@ -3,36 +3,25 @@
 module BalancedBinaryTree =
     type 'K KeyRecord =
         Datum of 'K * int
-        //| NoDatum
 
     type 'K BalancedSearchTree =
         Tree of 'K KeyRecord * 'K BalancedSearchTree * 'K BalancedSearchTree
         | EmptyTree
 
-    let leftEmpty t =
-        match t with
-        | Tree (_, EmptyTree, _) -> true
-        | Tree (_, Tree _, _) -> false
-        | EmptyTree -> false
-
+//
     let lChild t =
         match t with
         | Tree(_,lc,_) -> lc
-        // | Tree(_,(Tree(_,_,_) as lc),_) -> lc
-        // | Tree(_,EmptyTree,_) -> EmptyTree
         | EmptyTree -> EmptyTree
 
     let rChild t =
         match t with
         | Tree(_,_,rc) -> rc
-        //| Tree(_,_,(Tree(_,_,_) as rc)) -> rc
-        //| Tree(_,_,EmptyTree) -> EmptyTree
         | EmptyTree -> EmptyTree
-
+//
     let tHeight t =
         match t with
         | Tree(Datum(_,h),_,_) -> h
-        //| Tree(NoDatum, lc, rc) -> -1 // Not supposed to happen...
         | EmptyTree -> -1
 
     let tDatum t =
