@@ -6,7 +6,6 @@ namespace TreeSetdotNet
     type 'K BalancedSearchTree =
       | Tree of 'K KeyRecord * 'K BalancedSearchTree * 'K BalancedSearchTree
       | EmptyTree
-    val leftEmpty : t:'a BalancedSearchTree -> bool
     val lChild : t:'a BalancedSearchTree -> 'a BalancedSearchTree
     val rChild : t:'a BalancedSearchTree -> 'a BalancedSearchTree
     val tHeight : t:'a BalancedSearchTree -> int
