@@ -502,8 +502,48 @@ module BalancedBinaryTree =
             zipDown dir ((Right,cf)::pathList, rc) 
         | (pathList, Tree(_,_,EmptyTree)),                   Right ->
             z
-        | _,_ ->
-            failwith "zipDown:  impossible case reached?"
+        | (_,EmptyTree) , (Left|Right) ->
+            z
+
+    // Alternative definitions of zipDown.
+    // Not sure what's preferable; maybe zipDown'' is best
+    // way to say it?
+    // 
+    let rec zipDown' dir = 
+        function 
+        | (pathList, (Tree(_,lc,rc) as cf)) as z ->
+            if dir = Left then
+                match lc with
+                | Tree(_,_,_) ->
+                    zipDown' dir ((Left,cf)::pathList, lc)
+                | EmptyTree ->
+                    z
+            else
+                match rc with
+                | Tree(_,_,_) ->
+                    zipDown' dir ((Right,cf)::pathList, rc)
+                | EmptyTree ->
+                    z
+        | (_, EmptyTree) as z ->
+            z
+
+    let rec zipDown'' dir z =
+        match z with
+        | (pathList, (Tree(_,lc,rc) as cf)) as z ->
+            if dir = Left then
+                match lc with
+                | Tree(_,_,_) ->
+                    zipDown'' dir ((Left,cf)::pathList, lc)
+                | EmptyTree ->
+                    z
+            else
+                match rc with
+                | Tree(_,_,_) ->
+                    zipDown'' dir ((Right,cf)::pathList, rc)
+                | EmptyTree ->
+                    z
+        | (_, EmptyTree) as z ->
+            z
 
     // "Cursor" functions:
     // Turns out that if a traversal "falls off" the tree
@@ -520,6 +560,8 @@ module BalancedBinaryTree =
         | pathList, (Tree(_,_,(Tree(_,_,_) as rc)) as cf) ->
             (((Right, cf) :: pathList), rc) |>
             zipDown Left 
+        | pathList, Tree(_,_,EmptyTree) ->
+            zipAscend z Left 
         // The only way the following case arises is if the zipper
         // happens to have been calculated for a key that didn't 
         // exist in the tree in the first place:
@@ -527,10 +569,28 @@ module BalancedBinaryTree =
             tailZ, t
         | (Right, t) :: tailZ, EmptyTree ->
             zipAscend z Left 
-        | pathList, Tree(_,_,EmptyTree) ->
-            zipAscend z Left 
+        //
         | [], EmptyTree ->
             failwith "zipSuccessor:  impossible zipper."
+
+    let zipSuccessor' z =
+        match z with
+        | (pathList, (Tree(_,lc,rc) as cf)) ->
+            match rc with
+            | Tree(_,_,_) ->
+                (((Right,cf) :: pathList), rc) |>
+                zipDown' Left
+            | EmptyTree ->
+                zipAscend z Left
+        | (pathList, EmptyTree) ->
+            match pathList with
+            | (Left, t) :: tailZ ->
+                tailZ, t
+            | (Right, t) :: tailZ ->
+                zipAscend z Left
+            | [] ->
+                failwith "impossible?"
+
         
     let rec zipPredecessor z =
         match z with
