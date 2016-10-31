@@ -100,6 +100,12 @@ namespace TreeSetdotNet
       z: 'K BSTZipper -> 'K BSTZipper
     val zipPredecessor :
       z: 'K BSTZipper -> 'K BSTZipper
+    val zipRank :
+      z: 'K BSTZipper -> int
+    val zipMin :
+      z: 'K BSTZipper -> 'K BSTZipper
+    val zipMax :
+      z: 'K BSTZipper -> 'K BSTZipper
   end
 
 

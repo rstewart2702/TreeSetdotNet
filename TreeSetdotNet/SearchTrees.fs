@@ -517,6 +517,10 @@ module BalancedBinaryTree =
         | (Right, t) :: tailZ, EmptyTree ->
             zipAscend z Left 
         | pathList, Tree(_,_,EmptyTree) ->
+            // "Ascend" up to the most recent Left-traversal,
+            // because we are at the right-most leaf of a subtree
+            // which is the predecessor of the item onto which 
+            // zipAscend "moves" the zipper:
             zipAscend z Left 
         | [], EmptyTree ->
             failwith "zipSuccessor:  impossible zipper."
@@ -531,10 +535,86 @@ module BalancedBinaryTree =
         | (Right, t) :: tailZ, EmptyTree ->
             tailZ, t
         | pathList, Tree(_,EmptyTree,_) ->
+            // "Ascend" up to the most recent Right-traversal,
+            // because we are at the left-most leaf of a subtree
+            // which is the successor of the item onto which 
+            // zipAscend "moves" the zipper:
             zipAscend z Right
         | [], EmptyTree -> 
             failwith "zipPredecessor:  impossible zipper."
 
+
+    let rec inorderCount t =
+        match t with
+        | EmptyTree ->
+            0
+        | Tree(_,lt,rt) ->
+            1 + inorderCount lt + inorderCount rt
+
+    let rec zipRankR z r =
+        match z with
+        | (Right, t) :: tailZ , cf ->
+            zipRankR (tailZ, t) (r + 1 + inorderCount (lChild t))
+        | (Left, t) :: tailZ, cf ->
+            zipRankR (tailZ, t) r
+        | [], cf ->
+            r
+
+    let zipRank (z: BSTZipper<'K>) =
+        match z with
+        | pathList, cf ->
+            // leftCount is the tally of everything in the left
+            // of the "current focus," plus the node at the current focus.
+            // What this means when the current focus is on an EmptyTree
+            // is not quite so clear, so the user of this module should 
+            // keep that in mind!
+            let leftCount =
+                1 + inorderCount (lChild cf)
+            match pathList with
+            | [] -> 
+                leftCount
+            | (Left, t) :: tailZ ->
+                // The traversal stored in the zipper went to the left
+                // from t to get to cf, so there's nothing more to add
+                // to the acculumlated rank but leftCount:
+                zipRankR (tailZ, t) leftCount
+            | (Right, t) :: tailZ ->
+                // The traversal stored in the zipper went to the right
+                // from t to get to cf, so the accumulated rank count
+                // must add the count from the lChild of t, and the 
+                // root node of t, to the accumulated rank:
+                zipRankR (tailZ, t) leftCount + 1 + (inorderCount (lChild t))
+
+    let zipMin z =
+        let rec zipMinInner z =
+            match z with
+            | pathList, cf ->
+                match cf with
+                | EmptyTree ->
+                    z
+                | Tree(_,lc,_) ->
+                    match lc with
+                    | EmptyTree ->
+                        z
+                    | _ ->
+                        zipMinInner ((Left, cf) :: pathList, lc)
+        zipperTop z |> zipMinInner
+
+    let zipMax z =
+        let rec zipMaxInner z =
+            match z with
+            | pathList, cf ->
+                match cf with
+                | EmptyTree ->
+                    z
+                | Tree(_,_,rc) ->
+                    match rc with
+                    | EmptyTree ->
+                        z
+                    | _ ->
+                        zipMaxInner ((Right, cf) :: pathList, rc)
+        zipperTop z |> zipMaxInner
+    
 
     (* 
     Need several operations:
