@@ -586,34 +586,12 @@ module BalancedBinaryTree =
                 zipRankR (tailZ, t) leftCount + 1 + (inorderCount (lChild t))
 
     let zipMin z =
-        let rec zipMinInner z =
-            match z with
-            | pathList, cf ->
-                match cf with
-                | EmptyTree ->
-                    z
-                | Tree(_,lc,_) ->
-                    match lc with
-                    | EmptyTree ->
-                        z
-                    | _ ->
-                        zipMinInner ((Left, cf) :: pathList, lc)
-        zipperTop z |> zipMinInner
+        zipperTop z |>
+        zipDown Left
 
     let zipMax z =
-        let rec zipMaxInner z =
-            match z with
-            | pathList, cf ->
-                match cf with
-                | EmptyTree ->
-                    z
-                | Tree(_,_,rc) ->
-                    match rc with
-                    | EmptyTree ->
-                        z
-                    | _ ->
-                        zipMaxInner ((Right, cf) :: pathList, rc)
-        zipperTop z |> zipMaxInner
+        zipperTop z |>
+        zipDown Right
     
 
     (* 
