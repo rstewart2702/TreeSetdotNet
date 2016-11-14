@@ -122,7 +122,7 @@ module BalancedBinaryTree =
         match t with 
         | EmptyTree -> None
         | Tree(Datum(k,_),EmptyTree,_) -> Some k
-        | Tree(Datum(k,_),(Tree(_,_,_) as lc),_) -> findMin lc
+        | Tree(Datum(k,_),(Tree(_) as lc),_) -> findMin lc
 
     let rec btRemove t k =
         // I had tried to use pattern matching inappropriately, in previous versions of
@@ -279,7 +279,7 @@ module BalancedBinaryTree =
     let rec zipperTop z =
         match z with
         | [], EmptyTree -> z
-        | [], Tree(_,_,_) -> z
+        | [], Tree(_) -> z
         | (pathHead :: pathTail) , t ->
             match pathHead with
             | (Left|Right), t ->
@@ -426,7 +426,7 @@ module BalancedBinaryTree =
     let rec setUnion s1 s2 =
         match s1 with
         | EmptyTree -> s2
-        | Tree(_,_,_) ->
+        | Tree(_) ->
             match s2 with
             | EmptyTree -> s1
             | Tree(Datum(k2,_),lc2,rc2) ->
@@ -483,11 +483,11 @@ module BalancedBinaryTree =
     
     let rec zipDown dir z =
         match z, dir with
-        | (pathList, (Tree(_,(Tree(_,_,_) as lc),_) as cf)), Left ->
+        | (pathList, (Tree(_,(Tree(_) as lc),_) as cf)), Left ->
             zipDown dir ((Left,cf)::pathList, lc)
         | (pathList, Tree(_,EmptyTree,_)),                   Left ->
             z
-        | (pathList, (Tree(_,_,(Tree(_,_,_) as rc)) as cf)), Right ->
+        | (pathList, (Tree(_,_,(Tree(_) as rc)) as cf)), Right ->
             zipDown dir ((Right,cf)::pathList, rc) 
         | (pathList, Tree(_,_,EmptyTree)),                   Right ->
             z
@@ -506,7 +506,7 @@ module BalancedBinaryTree =
     // It really does matter quite a lot!
     let rec zipSuccessor z =
         match z with
-        | pathList, (Tree(_,_,(Tree(_,_,_) as rc)) as cf) ->
+        | pathList, (Tree(_,_,(Tree(_) as rc)) as cf) ->
             (((Right, cf) :: pathList), rc) |>
             zipDown Left 
         // The only way the following case arises is if the zipper
@@ -527,7 +527,7 @@ module BalancedBinaryTree =
         
     let rec zipPredecessor z =
         match z with
-        | pathList, (Tree(_,(Tree(_,_,_) as lc),_) as cf) ->
+        | pathList, (Tree(_,(Tree(_) as lc),_) as cf) ->
             (((Left, cf) :: pathList), lc) |>
             zipDown Right
         | (Left, t) :: tailZ, EmptyTree ->
