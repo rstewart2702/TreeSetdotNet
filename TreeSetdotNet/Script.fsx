@@ -648,3 +648,27 @@ myTree2 |> setUnion lgTree3 |> treeInorder
 I wonder what it would take to integrate this thing into Linq,
 and use it from C#?
 *)
+
+(
+let sumList = 
+    (List.fold (+) 0)
+let minSum = 
+    ([39;33;14;53;16;13] |> sumList) + 60 * ([2;1] |> sumList)
+let hours =
+    minSum / 60
+let mins =
+    minSum % 60
+hours, mins, sumList
+)
+// OR, YOU MIGHT SAY:
+(fun () ->
+let sumList = 
+    (List.fold (+) 0)
+let minSum = 
+    ([39;33;14;53;16;13] |> sumList) + 60 * ([2;1] |> sumList)
+let hours =
+    minSum / 60
+let mins =
+    minSum % 60
+hours, mins
+) ()
