@@ -234,7 +234,7 @@ match (splitTree lgTree "Nolan, Christopher") with
 | lt, rt -> (treeInorder lt, treeInorder rt)
 
 let myZip = 
-    zipTraverse ([],lgTree) "Wunder, Ron"
+    zipTraverse (BSTZipper(BSTZipPath([]),lgTree)) "Wunder, Ron"
 
 //match myZip with
 //| [], _ -> []
@@ -244,11 +244,11 @@ let myZip =
 //    | _, EmptyTree -> []
 //    | Left, t -> 
 
-match zipSplit (zipTraverse ([],lgTree) "Wunder, Ron") with
+match zipSplit (zipTraverse (BSTZipper(BSTZipPath([]),lgTree)) "Wunder, Ron") with
 | EmptyTree, EmptyTree -> [], []
 | lt, rt -> (treeInorder lt, treeInorder rt)
 
-zipSplit (zipTraverse ([],lgTree) "Wunder, Ron") ;;
+zipSplit (zipTraverse (BSTZipper(BSTZipPath([]),lgTree)) "Wunder, Ron") ;;
 
 
     ["Stewart, Richard" ;
@@ -335,16 +335,16 @@ zipSplit (zipTraverse ([],lgTree) "Wunder, Ron") ;;
 Tree(Datum ("Walther, C.F.W.",1),
            Tree (Datum ("Van Til, Cornelius",0),EmptyTree,EmptyTree),EmptyTree)
 
-match zipSplit (zipTraverse ([],lgTree) "Dobbs, Richard") with
+match zipSplit (zipTraverse (BSTZipper(BSTZipPath([]),lgTree)) "Dobbs, Richard") with
 | EmptyTree, EmptyTree -> [], []
 | lt, rt -> (treeInorder lt, treeInorder rt)
 
 
-match zipSplit (zipTraverse ([],lgTree) "Teukolsky, Saul") with
+match zipSplit (zipTraverse (BSTZipper(BSTZipPath([]),lgTree)) "Teukolsky, Saul") with
 | EmptyTree, EmptyTree -> [], []
 | lt, rt -> (treeInorder lt, treeInorder rt)
 
-zipTraverse ([],lgTree) "Teukolsky, Saul"
+zipTraverse (BSTZipper(BSTZipPath([]),lgTree)) "Teukolsky, Saul"
 
 match splitTree lgTree "Comstock, Anthony" with
 | EmptyTree, EmptyTree -> [], []
@@ -391,7 +391,7 @@ setDifference
 
 zipSplitR 
   EmptyTree EmptyTree
-  ([],(Tree (Datum ("Okasaki, Chris",0),EmptyTree,EmptyTree))) ;;
+  (BSTZipper(BSTZipPath([]),(Tree (Datum ("Okasaki, Chris",0),EmptyTree,EmptyTree)))) ;;
 
 setDifference 
   myTree2
@@ -537,9 +537,9 @@ lgTree2 |> (setDifference myTree2 )
 
 splitSet myTree2 "Cotillard, Marion"
 
-zipTraverse ([],myTree2) "Cotillard, Marion" 
+zipTraverse (BSTZipper(BSTZipPath([]),myTree2)) "Cotillard, Marion" 
 
-(zipTraverse ([],myTree2) "Cotillard, Marion" ) |> zipSplit
+(zipTraverse (BSTZipper(BSTZipPath([]),myTree2)) "Cotillard, Marion" ) |> zipSplit
 
 
 
@@ -547,50 +547,52 @@ setUnion lgTree2 myTree2 ;;
 setUnion myTree2 lgTree2;;
 
 
-zipTraverse ([],myTree2) "Flannery, William"
+zipTraverse (BSTZipper(BSTZipPath([]),myTree2)) "Flannery, William"
 
-match zipTraverse ([],myTree2) "Flannery, William" with
-| headZ :: tailZ, EmptyTree ->
-    match headZ with
-    | Right, (Tree(Datum(k,_),lc,_) as nft) ->
-        lc, (tailZ, nft),
+//match zipTraverse (BSTZipper(BSTZipPath([]),myTree2)) "Flannery, William" with
+//| BSTZipper(BSTZipPath(headZ :: tailZ), EmptyTree) ->
+//    match headZ with
+//    | Right, (Tree(Datum(k,_),lc,_) as nft) ->
+//        lc, (tailZ, nft),
 
-zipTraverse ([],myTree2) "Flannery, William" |> zipSplit
+zipTraverse (BSTZipper(BSTZipPath([]),myTree2)) "Flannery, William" |> zipSplit
 
 
-zipTraverse ([],myTree2) "Flannery, William" 
+zipTraverse (BSTZipper(BSTZipPath([]),myTree2)) "Flannery, William" 
 
 zipSplitR
     (Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree))
     EmptyTree
-    ([(Left,
-        Tree
-         (Datum ("Johns, Harold",1),
-          Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree));
-      (Left,
-       Tree
-         (Datum ("Michener, James",2),
-          Tree
-           (Datum ("Johns, Harold",1),
-            Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree),
-          Tree (Datum ("Okasaki, Chris",0),EmptyTree,EmptyTree)))],
-       (Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree))) ;;
+    (BSTZipper(
+      BSTZipPath([(Left,
+                   Tree
+                     (Datum ("Johns, Harold",1),
+                       Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree));
+                   (Left,
+                    Tree
+                     (Datum ("Michener, James",2),
+                       Tree
+                        (Datum ("Johns, Harold",1),
+                        Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree),
+                        Tree (Datum ("Okasaki, Chris",0),EmptyTree,EmptyTree)))]),
+        (Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree))) ) ;;
 
 zipSplitR 
     EmptyTree 
     EmptyTree
-    ([(Left,
-       Tree
-        (Datum ("Johns, Harold",1),
-         Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree));
-      (Left,
-       Tree
-         (Datum ("Michener, James",2),
-          Tree
-            (Datum ("Johns, Harold",1),
-             Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree),
-           Tree (Datum ("Okasaki, Chris",0),EmptyTree,EmptyTree)))],
-     Tree(Datum("Boswell, James",0),EmptyTree,EmptyTree) )
+    (BSTZipper(
+      BSTZipPath[(Left,
+                  Tree
+                    (Datum ("Johns, Harold",1),
+                    Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree));
+                 (Left,
+                   Tree
+                     (Datum ("Michener, James",2),
+                     Tree
+                       (Datum ("Johns, Harold",1),
+                       Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree),
+                     Tree (Datum ("Okasaki, Chris",0),EmptyTree,EmptyTree)))],
+       Tree(Datum("Boswell, James",0),EmptyTree,EmptyTree) ) ) ;;
 
 concatTrees 
     EmptyTree
@@ -600,17 +602,17 @@ concatTrees
 zipSplitR
     EmptyTree
     (Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree))
-    ([
-      (Left,
-       Tree
-         (Datum ("Michener, James",2),
-          Tree
-            (Datum ("Johns, Harold",1),
-             Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree),
-           Tree (Datum ("Okasaki, Chris",0),EmptyTree,EmptyTree)))],
+    (BSTZipper(
+      BSTZipPath[(Left,
+                    Tree
+                      (Datum ("Michener, James",2),
+                      Tree
+                        (Datum ("Johns, Harold",1),
+                         Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree),
+                      Tree (Datum ("Okasaki, Chris",0),EmptyTree,EmptyTree)))],
       Tree
         (Datum ("Johns, Harold",1),
-         Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree) )
+         Tree (Datum ("Boswell, James",0),EmptyTree,EmptyTree),EmptyTree) ) ) ;;
 
 zipSplitR'
     EmptyTree 
