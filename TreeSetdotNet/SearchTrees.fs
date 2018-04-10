@@ -482,27 +482,16 @@ module BalancedBinaryTree =
                         setDifference partR1 rc2
                     concatSets diffL diffR
                     
+    /// Ascend up to the most recent dir-wards turn recorded in the zipper z:
     let rec zipAscend z dir =
         match z with
-        | [], t -> z
-        | (pDir, t) :: tailZ, cf ->
+        | BSTZipper(BSTZipPath([]), cf) -> z
+        | BSTZipper(BSTZipPath((pDir, t)::tailZ), cf) ->
             if pDir = dir then
-                tailZ, t
-            else
-                zipAscend (tailZ, t) dir
-
-    /// Ascend up to the most recent dir-wards turn recorded in the zipper z:
-    let rec zipAscend' z dir =
-        match z with
-        | BSTZipper(BSTZipPath(p), cf) ->
-            match p with
-            | [] -> z
-            | (pDir, t) :: tailZ ->
-                if pDir = dir then
-                    BSTZipper(BSTZipPath(tailZ), t)
-                else
-                    zipAscend' (BSTZipper(BSTZipPath(tailZ), t)) dir
-    
+                BSTZipper(BSTZipPath(tailZ), t)
+            else 
+                zipAscend (BSTZipper(BSTZipPath(tailZ), t)) dir
+                    
     let rec zipDown dir z =
         match dir with
         | Left ->
@@ -562,13 +551,13 @@ module BalancedBinaryTree =
         | BSTZipper( BSTZipPath((Left, t) :: tailZ), EmptyTree ) ->
             BSTZipper(BSTZipPath(tailZ), t)
         | BSTZipper( BSTZipPath((Right, t) :: tailZ), EmptyTree ) ->
-            zipAscend' z Left 
+            zipAscend z Left 
         | BSTZipper( BSTZipPath(pathList) , Tree(_,_,EmptyTree) ) ->
             // "Ascend" up to the most recent Left-traversal,
             // because we are at the right-most leaf of a subtree
             // which is the predecessor of the item onto which 
             // zipAscend "moves" the zipper:
-            zipAscend' z Left 
+            zipAscend z Left 
         | BSTZipper( BSTZipPath([]), EmptyTree ) ->
             failwith "zipSuccessor:  impossible zipper."
         
@@ -578,7 +567,7 @@ module BalancedBinaryTree =
             BSTZipper(BSTZipPath((Left, cf) :: pathList), lc) |>
             zipDown Right
         | BSTZipper( BSTZipPath((Left, t) :: tailZ), EmptyTree ) ->
-            zipAscend' z Right 
+            zipAscend z Right 
         | BSTZipper( BSTZipPath((Right, t) :: tailZ), EmptyTree ) ->
             BSTZipper(BSTZipPath(tailZ), t)
         | BSTZipper( BSTZipPath(pathList), Tree(_,EmptyTree,_) ) ->
@@ -586,7 +575,7 @@ module BalancedBinaryTree =
             // because we are at the left-most leaf of a subtree
             // which is the successor of the item onto which 
             // zipAscend "moves" the zipper:
-            zipAscend' z Right
+            zipAscend z Right
         | BSTZipper(BSTZipPath([]), EmptyTree ) -> 
             failwith "zipPredecessor:  impossible zipper."
 
