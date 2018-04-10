@@ -50,29 +50,29 @@ namespace TreeSetdotNet
         | Right
         // | NeitherDir
 
-    type 'K BSTZipPath =
-        (BSTZipperDirection * 'K BalancedSearchTree) list
+    type 'K BSTZipPath' =
+        BSTZipPath of (BSTZipperDirection * 'K BalancedSearchTree) list
 
-    type 'K BSTZipper =
-        'K BSTZipPath * 'K BalancedSearchTree
+    type 'K BSTZipper' =
+        BSTZipper of 'K BSTZipPath' * 'K BalancedSearchTree
     //
     val zipperTop :
-      z: 'a BSTZipper -> 'a BSTZipper
+      z: 'a BSTZipper' -> 'a BSTZipper'
         when 'a : comparison
     val zipTraverse :
-      z: 'a BSTZipper -> k: 'a -> 'a BSTZipper
+      z: 'a BSTZipper' -> k: 'a -> 'a BSTZipper'
         when 'a : comparison
     val zipperMoveTo :
-      z: 'a BSTZipper -> k: 'a -> 'a BSTZipper
+      z: 'a BSTZipper' -> k: 'a -> 'a BSTZipper'
        when 'a : comparison
     val zipSplitR :
         ls: 'a BalancedSearchTree 
         -> rs: 'a BalancedSearchTree 
-        -> z: 'a BSTZipper 
+        -> z: 'a BSTZipper' 
         -> ('a BalancedSearchTree * 'a BalancedSearchTree)
         when 'a : comparison
     val zipSplit :
-      z: 'a BSTZipper -> ('a BalancedSearchTree * 'a BalancedSearchTree)
+      z: 'a BSTZipper' -> ('a BalancedSearchTree * 'a BalancedSearchTree)
         when 'a : comparison
     val splitTree :
       t: 'a BalancedSearchTree -> k: 'a -> ('a BalancedSearchTree * 'a BalancedSearchTree)
@@ -97,15 +97,15 @@ namespace TreeSetdotNet
         when 'a: comparison
     //
     val zipSuccessor :
-      z: 'K BSTZipper -> 'K BSTZipper
+      z: 'K BSTZipper' -> 'K BSTZipper'
     val zipPredecessor :
-      z: 'K BSTZipper -> 'K BSTZipper
+      z: 'K BSTZipper' -> 'K BSTZipper'
     val zipRank :
-      z: 'K BSTZipper -> int
+      z: 'K BSTZipper' -> int
     val zipMin :
-      z: 'K BSTZipper -> 'K BSTZipper
+      z: 'K BSTZipper' -> 'K BSTZipper'
     val zipMax :
-      z: 'K BSTZipper -> 'K BSTZipper
+      z: 'K BSTZipper' -> 'K BSTZipper'
   end
 
 

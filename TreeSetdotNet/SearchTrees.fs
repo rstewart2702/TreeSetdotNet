@@ -270,63 +270,73 @@ module BalancedBinaryTree =
         | Right
         // | NeitherDir
 
-    type 'K BSTZipPath =
-        (BSTZipperDirection * 'K BalancedSearchTree) list
+    type 'K BSTZipPath' =
+        BSTZipPath of (BSTZipperDirection * 'K BalancedSearchTree) list
 
-    type 'K BSTZipper =
-        'K BSTZipPath * 'K BalancedSearchTree
+    type 'K BSTZipper' =
+        BSTZipper of 'K BSTZipPath' * 'K BalancedSearchTree
+
+    // type 'K BSTZipper2 =
+    //    'K BSTZipPath * 'K BalancedSearchTree
+
+    let produceZipper t =
+        BSTZipper(BSTZipPath([]), t)
+        (* somehow the mathematics of algebraic data types tells us about how to structure these thingss
+           so that they have desirable properties?
+            *)
 
     let rec zipperTop z =
         match z with
-        | [], EmptyTree -> z
-        | [], Tree(_) -> z
-        | (pathHead :: pathTail) , t ->
+        | BSTZipper (BSTZipPath([]), EmptyTree) -> z
+        | BSTZipper (BSTZipPath([]), Tree(_)) -> z
+        | BSTZipper(BSTZipPath((pathHead :: pathTail)) , t) ->
             match pathHead with
             | (Left|Right), t ->
-                zipperTop (pathTail, t)
+                zipperTop (BSTZipper(BSTZipPath(pathTail), t))
 
     let rec zipTraverse z k =
         match z with
-        | _, EmptyTree -> z
-        | path, (Tree(Datum(rk,rh),lc,rc) as root) ->
+        | BSTZipper(_, EmptyTree)-> z
+        | BSTZipper(BSTZipPath(path), (Tree(Datum(rk,rh),lc,rc) as root)) ->
             if k < rk then
-                zipTraverse (((Left,root) :: path), lc) k
+                zipTraverse (BSTZipper(BSTZipPath((Left,root)  :: path), lc)) k
             elif rk < k then
-                zipTraverse (((Right,root) :: path), rc) k
+                zipTraverse (BSTZipper(BSTZipPath((Right,root) :: path), rc)) k
             else z
 
     let rec zipperMoveTo z k =
         zipTraverse (zipperTop z) k
 
     let rec zipSplitR ls rs z =
-        match z with 
-        | [], _ -> ls , rs
-        | headZ :: tailZ, (Tree(Datum(fk,_),flc,frc) as focusTree) ->
+        match z with
+        | BSTZipper(BSTZipPath([]), _) -> ls , rs
+        | BSTZipper(BSTZipPath(headZ :: tailZ), (Tree(Datum(fk,_),flc,frc) as focusTree) ) ->
             match headZ with
             | Left, (Tree(Datum(dk,_),dlc,drc) as ptOfDeparture) ->
                 zipSplitR
                     ls
                     // (concatTrees drc dk rs)
                     (concatTrees rs dk drc)
-                    (tailZ, ptOfDeparture)
+                    (BSTZipper(BSTZipPath(tailZ), ptOfDeparture))
             | Right, (Tree(Datum(dk,_),dlc,drc) as ptOfDeparture) ->
                 zipSplitR
-                    // (concatTrees ls dk dlc)
                     (concatTrees dlc dk ls)
                     rs
-                    (tailZ, ptOfDeparture)
-            | _,    EmptyTree ->
-                failwith "zipSplitR:  impossible pattern in zipper head?"
-        | _, EmptyTree -> 
-            failwith "zipSplitR:  impossible pattern in zipper?"
+                    (BSTZipper(BSTZipPath(tailZ), ptOfDeparture))
+            | _,     EmptyTree ->
+                failwith "zipSplitR: impossible pattern in zipper head?"
+        | BSTZipper(_, EmptyTree) ->
+            failwith "zipSplitR: impossible pattern in zipper?"
+
+
 
     let zipSplit z =
         match z with
-        | [], EmptyTree -> EmptyTree, EmptyTree
-        | [], Tree(_,flc,frc) ->
+        | BSTZipper(BSTZipPath([]), EmptyTree) -> EmptyTree, EmptyTree
+        | BSTZipper(BSTZipPath([]), Tree(_,flc,frc)) ->
             flc,frc
         //
-        | headZ :: tailZ, EmptyTree ->
+        | BSTZipper(BSTZipPath(headZ :: tailZ), EmptyTree) ->
             // The zipper traversal fell off the tree, i.e., the sought-after key
             // did not exist in the set:
             match headZ with
@@ -339,7 +349,7 @@ module BalancedBinaryTree =
                     EmptyTree  // i.e., we fell off, to left of, the dk key
                     // (concatTrees rc dk EmptyTree)
                     (concatTrees EmptyTree dk rc)
-                    (tailZ, ptOfOrigin)
+                    (BSTZipper(BSTZipPath(tailZ), ptOfOrigin))
             | Right, (Tree(Datum(dk,_),lc,_) as ptOfOrigin) ->
                 // ordering of the subtrees:
                 //   lc (which is to the left of the key which is in the origin tree)
@@ -349,10 +359,10 @@ module BalancedBinaryTree =
                     // (concatTrees EmptyTree dk lc)
                     (concatTrees lc dk EmptyTree)
                     EmptyTree
-                    (tailZ, ptOfOrigin)
+                    (BSTZipper(BSTZipPath(tailZ), ptOfOrigin))
             | _, EmptyTree ->
                 failwith "zipSplit:  impossible pattern in zipper head, left the tree."
-        | headZ :: tailZ, (Tree(Datum(fk,_),flc,frc) as currentFocus) ->
+        | BSTZipper(BSTZipPath(headZ :: tailZ), (Tree(Datum(fk,_),flc,frc) as currentFocus)) ->
             match headZ with
             | Left, (Tree(Datum(dk,_),_,rc) as ptOfOrigin) ->
                 // ordering of the subtrees:
@@ -362,7 +372,7 @@ module BalancedBinaryTree =
                 zipSplitR
                     flc
                     (concatTrees frc dk rc)
-                    (tailZ, ptOfOrigin)
+                    (BSTZipper(BSTZipPath(tailZ), ptOfOrigin))
             | Right, (Tree(Datum(dk,_),lc,_) as ptOfOrigin) ->
                 // ordering of the subtrees:
                 //   lc (which is to the left of all of the keys in the focus)
@@ -371,14 +381,14 @@ module BalancedBinaryTree =
                 zipSplitR
                     (concatTrees lc dk flc)
                     frc
-                    (tailZ, ptOfOrigin)
+                    (BSTZipper(BSTZipPath(tailZ), ptOfOrigin))
             | _, EmptyTree ->
                 failwith "zipSplit:  impossible pattern in zipper head, stayed inside the tree."
 
     let rec splitTree t k =
         let locZip = 
             // zipTraverse [(NeitherDir,t)] k
-            zipTraverse ([],t) k
+            zipTraverse (BSTZipper(BSTZipPath([]),t)) k
         zipSplit locZip // EmptyTree EmptyTree
     
     // Quick-and-dirty functions to provide inorder traversal
@@ -400,9 +410,9 @@ module BalancedBinaryTree =
 
     let splitSet s k =
         let locZipper =
-            zipTraverse ([],s) k
+            zipTraverse (BSTZipper(BSTZipPath([]),s)) k
         match locZipper with
-        | [], t ->
+        | BSTZipper(BSTZipPath([]), t) ->
             // the sought-after key is at the root of the tree!
             match t with
             | EmptyTree -> 
@@ -410,7 +420,7 @@ module BalancedBinaryTree =
                 EmptyTree, None, EmptyTree
             | Tree(Datum(k,_),lc,rc) ->
                 lc, Some k, rc
-        | z, t ->
+        | BSTZipper(BSTZipPath(z), t) ->
             let splitKey =
                 match t with
                 | EmptyTree ->
@@ -480,19 +490,56 @@ module BalancedBinaryTree =
                 tailZ, t
             else
                 zipAscend (tailZ, t) dir
+
+    /// Ascend up to the most recent dir-wards turn recorded in the zipper z:
+    let rec zipAscend' z dir =
+        match z with
+        | BSTZipper(BSTZipPath(p), cf) ->
+            match p with
+            | [] -> z
+            | (pDir, t) :: tailZ ->
+                if pDir = dir then
+                    BSTZipper(BSTZipPath(tailZ), t)
+                else
+                    zipAscend' (BSTZipper(BSTZipPath(tailZ), t)) dir
     
     let rec zipDown dir z =
-        match z, dir with
-        | (pathList, (Tree(_,(Tree(_) as lc),_) as cf)), Left ->
-            zipDown dir ((Left,cf)::pathList, lc)
-        | (pathList, Tree(_,EmptyTree,_)),                   Left ->
-            z
-        | (pathList, (Tree(_,_,(Tree(_) as rc)) as cf)), Right ->
-            zipDown dir ((Right,cf)::pathList, rc) 
-        | (pathList, Tree(_,_,EmptyTree)),                   Right ->
-            z
-        | _,_ ->
-            failwith "zipDown:  impossible case reached?"
+        match dir with
+        | Left ->
+            match z with
+            | BSTZipper(BSTZipPath(zp), ( (Tree(_,(Tree(_) as lc),_)) as cf ) ) ->
+                zipDown dir (BSTZipper(BSTZipPath((dir,cf)::zp), lc))
+            | BSTZipper(BSTZipPath(zp),   (Tree(_,EmptyTree,_))               ) ->
+                z
+            | BSTZipper(BSTZipPath(zp), EmptyTree) ->
+                z
+        | Right ->
+            match z with
+            | BSTZipper(BSTZipPath(zp), ( (Tree(_,_,(Tree(_) as rc)) as cf ))) ->
+                zipDown dir (BSTZipper(BSTZipPath((dir,cf)::zp), rc))
+            | BSTZipper(BSTZipPath(zp),   (Tree(_,_,EmptyTree))              ) ->
+                z
+            | BSTZipper(BSTZipPath(zp), EmptyTree) ->
+                z
+
+//    let rec zipDown dir z =
+//        match z, dir with
+//        | (pathList, (Tree(_,(Tree(_) as lc),_) as cf)), Left ->
+//            zipDown dir ((Left,cf)::pathList, lc)
+//        | (pathList, Tree(_,EmptyTree,_)),                   Left ->
+//            z
+//        | (pathList, (Tree(_,_,(Tree(_) as rc)) as cf)), Right ->
+//            zipDown dir ((Right,cf)::pathList, rc) 
+//        | (pathList, Tree(_,_,EmptyTree)),                   Right ->
+//            z
+//        | _,_ ->
+//            failwith "zipDown:  impossible case reached?"
+//        match dir, BSTZipper(BSTZipPath(zp), t) with
+//        | Left, zp ->
+//            match zp with
+//            | 
+//        match z with
+//        | BSTZipper(BSTZipPath(l), t) ->
 
     // "Cursor" functions:
     // Turns out that if a traversal "falls off" the tree
@@ -506,41 +553,41 @@ module BalancedBinaryTree =
     // It really does matter quite a lot!
     let rec zipSuccessor z =
         match z with
-        | pathList, (Tree(_,_,(Tree(_) as rc)) as cf) ->
-            (((Right, cf) :: pathList), rc) |>
+        | BSTZipper( BSTZipPath(pathList), (Tree(_,_,(Tree(_) as rc)) as cf) )->
+            BSTZipper(BSTZipPath((Right, cf) :: pathList), rc) |>
             zipDown Left 
         // The only way the following case arises is if the zipper
         // happens to have been calculated for a key that didn't 
         // exist in the tree in the first place:
-        | (Left, t) :: tailZ, EmptyTree ->
-            tailZ, t
-        | (Right, t) :: tailZ, EmptyTree ->
-            zipAscend z Left 
-        | pathList, Tree(_,_,EmptyTree) ->
+        | BSTZipper( BSTZipPath((Left, t) :: tailZ), EmptyTree ) ->
+            BSTZipper(BSTZipPath(tailZ), t)
+        | BSTZipper( BSTZipPath((Right, t) :: tailZ), EmptyTree ) ->
+            zipAscend' z Left 
+        | BSTZipper( BSTZipPath(pathList) , Tree(_,_,EmptyTree) ) ->
             // "Ascend" up to the most recent Left-traversal,
             // because we are at the right-most leaf of a subtree
             // which is the predecessor of the item onto which 
             // zipAscend "moves" the zipper:
-            zipAscend z Left 
-        | [], EmptyTree ->
+            zipAscend' z Left 
+        | BSTZipper( BSTZipPath([]), EmptyTree ) ->
             failwith "zipSuccessor:  impossible zipper."
         
     let rec zipPredecessor z =
         match z with
-        | pathList, (Tree(_,(Tree(_) as lc),_) as cf) ->
-            (((Left, cf) :: pathList), lc) |>
+        | BSTZipper( BSTZipPath(pathList), (Tree(_,(Tree(_) as lc),_) as cf) ) ->
+            BSTZipper(BSTZipPath((Left, cf) :: pathList), lc) |>
             zipDown Right
-        | (Left, t) :: tailZ, EmptyTree ->
-            zipAscend z Right 
-        | (Right, t) :: tailZ, EmptyTree ->
-            tailZ, t
-        | pathList, Tree(_,EmptyTree,_) ->
+        | BSTZipper( BSTZipPath((Left, t) :: tailZ), EmptyTree ) ->
+            zipAscend' z Right 
+        | BSTZipper( BSTZipPath((Right, t) :: tailZ), EmptyTree ) ->
+            BSTZipper(BSTZipPath(tailZ), t)
+        | BSTZipper( BSTZipPath(pathList), Tree(_,EmptyTree,_) ) ->
             // "Ascend" up to the most recent Right-traversal,
             // because we are at the left-most leaf of a subtree
             // which is the successor of the item onto which 
             // zipAscend "moves" the zipper:
-            zipAscend z Right
-        | [], EmptyTree -> 
+            zipAscend' z Right
+        | BSTZipper(BSTZipPath([]), EmptyTree ) -> 
             failwith "zipPredecessor:  impossible zipper."
 
 
@@ -560,9 +607,9 @@ module BalancedBinaryTree =
         | [], cf ->
             r
 
-    let zipRank (z: BSTZipper<'K>) =
+    let zipRank z =
         match z with
-        | pathList, cf ->
+        | BSTZipper(BSTZipPath(pathList), cf) ->
             // leftCount is the tally of everything in the left
             // of the "current focus," plus the node at the current focus.
             // What this means when the current focus is on an EmptyTree
