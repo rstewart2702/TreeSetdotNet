@@ -2,7 +2,7 @@
 
 namespace TreeSetdotNet
   module BalancedBinaryTree = begin
-    type 'K KeyRecord = | Datum of 'K * int
+    type 'K KeyRecord = | Datum of 'K * int * int
     type 'K BalancedSearchTree =
       | Tree of 'K KeyRecord * 'K BalancedSearchTree * 'K BalancedSearchTree
       | EmptyTree
@@ -106,6 +106,10 @@ namespace TreeSetdotNet
       z: 'K BSTZipper' -> 'K BSTZipper'
     val zipMax :
       z: 'K BSTZipper' -> 'K BSTZipper'
+    val setRankOf :
+      s: 'K BalancedSearchTree -> k: 'K -> acc: int -> int when 'K: comparison
+    val setIndex :
+      t: 'K BalancedSearchTree -> i: int -> acc: int -> 'K option when 'K : comparison
   end
 
 

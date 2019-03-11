@@ -2,7 +2,7 @@
 
 module BalancedBinaryTree =
     type 'K KeyRecord =
-        Datum of 'K * int
+        Datum of 'K * int * int // i.e., this is a triple of "data", and tree-height, and tree-cardinality.
 
     type 'K BalancedSearchTree =
         Tree of 'K KeyRecord * 'K BalancedSearchTree * 'K BalancedSearchTree
@@ -21,8 +21,13 @@ module BalancedBinaryTree =
 //
     let tHeight t =
         match t with
-        | Tree(Datum(_,h),_,_) -> h
+        | Tree(Datum(_,h,_),_,_) -> h
         | EmptyTree -> -1
+
+    let tCard t =
+        match t with
+        | Tree(Datum(_,_,c),_,_) -> c
+        | EmptyTree -> 0
 
     let tDatum t =
         match t with
@@ -31,7 +36,7 @@ module BalancedBinaryTree =
 
     let tKandH t = 
         match t with
-        | Tree(Datum(k,h),_,_) -> Some (k,h)
+        | Tree(Datum(k,h,_),_,_) -> Some (k,h)
         | EmptyTree -> None
 
     // These rotation primitives are shockingly short and elegant.
@@ -48,33 +53,37 @@ module BalancedBinaryTree =
         match t with
         | EmptyTree -> EmptyTree
         | Tree(_,_,EmptyTree) -> t
-        | Tree(Datum(rootData,_),
+        | Tree(Datum(rootData,_,_),
                lc,
-               Tree(Datum(rcData,_), lcOfRc, rcOfRc)) ->
+               Tree(Datum(rcData,_,_), lcOfRc, rcOfRc)) ->
             let newLcHeight = 
                 (max (tHeight lc) (tHeight lcOfRc)) + 1
-            Tree(Datum(rcData, (max newLcHeight (tHeight rcOfRc)) + 1), 
-                 (Tree(Datum(rootData, newLcHeight), lc, lcOfRc)),
+            let newLcCard =
+                tCard lc + tCard lcOfRc + 1
+            Tree(Datum(rcData, (max newLcHeight (tHeight rcOfRc)) + 1, newLcCard + tCard rcOfRc + 1), 
+                 (Tree(Datum(rootData, newLcHeight, newLcCard), lc, lcOfRc)),
                  rcOfRc)
 
     let rightRotate t =
         match t with
         | EmptyTree -> EmptyTree
         | Tree(_,EmptyTree,_) -> t
-        | Tree(Datum(rootData,_),
-               Tree(Datum(lcData,_),lcOfLc,rcOfLc),
+        | Tree(Datum(rootData,_,_),
+               Tree(Datum(lcData,_,_),lcOfLc,rcOfLc),
                rc) ->
             let newRcHeight =
                 (max (tHeight rcOfLc) (tHeight rc)) + 1
-            Tree(Datum(lcData, (max (tHeight lcOfLc) newRcHeight) + 1),
+            let newRcCard =
+                tCard rc + tCard rcOfLc + 1
+            Tree(Datum(lcData, (max (tHeight lcOfLc) newRcHeight) + 1, newRcCard + tCard lcOfLc + 1),
                  lcOfLc,
-                 Tree(Datum(rootData, newRcHeight), rcOfLc, rc))
+                 Tree(Datum(rootData, newRcHeight, newRcCard), rcOfLc, rc))
 
 
     let rebalance t =
         match t with 
         | EmptyTree -> EmptyTree
-        | Tree(Datum(rootKey,_), lc, rc) ->
+        | Tree(Datum(rootKey,_,_), lc, rc) ->
             if abs ((tHeight lc) - (tHeight rc)) > 1 then
                 if (tHeight lc) > (tHeight rc) then
                     let heightOfLcOfLc = tHeight (lChild lc)
@@ -84,7 +93,7 @@ module BalancedBinaryTree =
                             leftRotate lc
                         else 
                             lc
-                    rightRotate (Tree(Datum(rootKey,(max (tHeight newLc) (tHeight rc))+1),
+                    rightRotate (Tree(Datum(rootKey,(max (tHeight newLc) (tHeight rc))+1,tCard newLc + 1 + tCard rc),
                                       newLc,
                                       rc))
                 else // if (theight lc) < (tHeight rc) then
@@ -95,7 +104,7 @@ module BalancedBinaryTree =
                             rightRotate rc
                         else 
                             rc
-                    leftRotate (Tree(Datum(rootKey,(max (tHeight lc) (tHeight newRc))+1),
+                    leftRotate (Tree(Datum(rootKey,(max (tHeight lc) (tHeight newRc))+1, tCard lc + 1 + tCard newRc),
                                      lc,
                                      newRc))
             else
@@ -104,8 +113,8 @@ module BalancedBinaryTree =
 
     let rec btInsert t k =
         match t with
-        | EmptyTree -> Tree(Datum(k,0),EmptyTree,EmptyTree)
-        | Tree(Datum(rootKey,_),lc,rc) ->
+        | EmptyTree -> Tree(Datum(k,0,1),EmptyTree,EmptyTree)
+        | Tree(Datum(rootKey,_,_),lc,rc) ->
             let ltNew =
                 if rootKey < k then
                     lc 
@@ -116,13 +125,13 @@ module BalancedBinaryTree =
                     btInsert rc k 
                 else
                     rc 
-            rebalance ( Tree(Datum(rootKey, (max (tHeight ltNew) (tHeight rtNew))+1),ltNew,rtNew) )
+            rebalance ( Tree(Datum(rootKey, (max (tHeight ltNew) (tHeight rtNew))+1, tCard ltNew + 1 + tCard rtNew),ltNew,rtNew) )
 
     let rec findMin t = 
         match t with 
         | EmptyTree -> None
-        | Tree(Datum(k,_),EmptyTree,_) -> Some k
-        | Tree(Datum(k,_),(Tree(_) as lc),_) -> findMin lc
+        | Tree(Datum(k,_,_),EmptyTree,_) -> Some k
+        | Tree(Datum(k,_,_),(Tree(_) as lc),_) -> findMin lc
 
     let rec btRemove t k =
         // I had tried to use pattern matching inappropriately, in previous versions of
@@ -143,7 +152,7 @@ module BalancedBinaryTree =
         // in terms of the height field?
         match t with
         | EmptyTree -> EmptyTree
-        | Tree(Datum(rootKey,0),EmptyTree,EmptyTree) ->
+        | Tree(Datum(rootKey,0,_),EmptyTree,EmptyTree) ->
             // If the item appears in the root, and it is the only item in the tree,
             // then the result is an EmptyTree.
             // Otherwise, return the original tree, for the sought item, k,
@@ -151,18 +160,18 @@ module BalancedBinaryTree =
             // We thus take the philosophy that the result of trying to remove
             // a non-existent item from a tree leaves the tree unchanged.
             if rootKey = k then EmptyTree else t
-        | Tree(Datum(rootKey,_),lc,rc) ->
+        | Tree(Datum(rootKey,_,_),lc,rc) ->
             if k < rootKey then
                 let newLc = btRemove lc k
                 rebalance (
-                    Tree(Datum(rootKey,(max (tHeight newLc) (tHeight rc))+1),
+                    Tree(Datum(rootKey,(max (tHeight newLc) (tHeight rc))+1, tCard newLc + 1 + tCard rc),
                          newLc,
                          rc)
                 )
             else if rootKey < k then
                 let newRc = btRemove rc k
                 rebalance (
-                    Tree(Datum(rootKey,(max (tHeight lc) (tHeight newRc))+1),
+                    Tree(Datum(rootKey,(max (tHeight lc) (tHeight newRc))+1, tCard lc + 1 + tCard newRc),
                          lc,
                          newRc)
                 )
@@ -171,7 +180,7 @@ module BalancedBinaryTree =
                 | Some minKey ->
                     let newRc = btRemove rc minKey
                     rebalance (
-                        Tree(Datum(minKey,(max (tHeight lc) (tHeight newRc))+1),
+                        Tree(Datum(minKey,(max (tHeight lc) (tHeight newRc))+1, tCard lc + 1 + tCard newRc),
                              lc,
                              newRc)
                     )
@@ -196,29 +205,29 @@ module BalancedBinaryTree =
         // the height or the rt.
         match lt, rt with
         | EmptyTree,                       EmptyTree -> 
-            Tree(Datum(x,0),lt,rt)
-        | Tree(Datum(dl,0),_,_),           EmptyTree -> 
-            Tree(Datum(dl,1),
+            Tree(Datum(x,0,1),lt,rt)
+        | Tree(Datum(dl,0,_),_,_),           EmptyTree -> 
+            Tree(Datum(dl,1,2),
                  EmptyTree,
-                 Tree(Datum(x,0),EmptyTree,EmptyTree))
-        | Tree(Datum(dl,h),lcOfLt,rcOfLt), _        ->
+                 Tree(Datum(x,0,1),EmptyTree,EmptyTree))
+        | Tree(Datum(dl,h,_),lcOfLt,rcOfLt), _        ->
             if (h) > (tHeight rt) then
                 let newRt = 
                     rightConcat rcOfLt x rt
                 rebalance (
-                    Tree(Datum(dl, (max (tHeight lcOfLt) (tHeight newRt))+1),
+                    Tree(Datum(dl, (max (tHeight lcOfLt) (tHeight newRt))+1, tCard lcOfLt + 1 + tCard newRt),
                          lcOfLt,
                          newRt)
                 )
             else
-                Tree(Datum(x,(max (tHeight lt) (tHeight rt))+1),lt,rt) 
-        | EmptyTree, Tree(Datum(rk,0),EmptyTree,EmptyTree) ->
+                Tree(Datum(x,(max (tHeight lt) (tHeight rt))+1, tCard lt + 1 + tCard rt),lt,rt) 
+        | EmptyTree, Tree(Datum(rk,0,_),EmptyTree,EmptyTree) ->
             // If the height of the left tree has gone down to -1,
             // then we must have fallen off the tree in the process
             // of trying to get to a shorter right-spine subtree.
             // This means that we have reached the shortest possible
             // right-spine subtree!
-            Tree(Datum(x,1),EmptyTree,rt)
+            Tree(Datum(x,1,2),EmptyTree,rt)
         | _, _ ->
             failwith "rightConcat:  pattern matching failed!!!"
 
@@ -229,26 +238,26 @@ module BalancedBinaryTree =
         // the height of the lt.
         match lt, rt with
         | EmptyTree,                       EmptyTree             -> 
-            Tree(Datum(x,0),EmptyTree,EmptyTree)
-        | EmptyTree,                       Tree(Datum(dr,0),_,_) ->
-            Tree(Datum(dr,1),
-                 Tree(Datum(x,0),EmptyTree,EmptyTree),
+            Tree(Datum(x,0,1),EmptyTree,EmptyTree)
+        | EmptyTree,                       Tree(Datum(dr,0,_),_,_) ->
+            Tree(Datum(dr,1,2),
+                 Tree(Datum(x,0,1),EmptyTree,EmptyTree),
                  EmptyTree)
-        | _,                               Tree(Datum(dr,hr),lcOfRt,rcOfRt) ->
+        | _,                               Tree(Datum(dr,hr,_),lcOfRt,rcOfRt) ->
             if (tHeight lt) < hr then
                 let newLt =
                     leftConcat lt x lcOfRt
                 rebalance (
-                    Tree(Datum(dr,(max (tHeight newLt) (tHeight rcOfRt))+1),
+                    Tree(Datum(dr,(max (tHeight newLt) (tHeight rcOfRt))+1, tCard newLt + 1 + tCard rcOfRt),
                          newLt,
                          rcOfRt)
                 )
             else
-                Tree(Datum(x,(max (tHeight lt) (tHeight rt))+1),lt,rt)
-        | Tree(Datum(lk,0),EmptyTree,EmptyTree), EmptyTree ->
+                Tree(Datum(x,(max (tHeight lt) (tHeight rt))+1, tCard lt + 1 + tCard rt),lt,rt)
+        | Tree(Datum(lk,0,_),EmptyTree,EmptyTree), EmptyTree ->
             // height of the right tree has "gone negative,"
             // which means we must return the left tree:
-            Tree(Datum(x,1),lt,EmptyTree)
+            Tree(Datum(x,1,2),lt,EmptyTree)
         | _,  _ ->
             failwith "leftConcat:  pattern matching failed!!!"
 
@@ -297,7 +306,7 @@ module BalancedBinaryTree =
     let rec zipTraverse z k =
         match z with
         | BSTZipper(_, EmptyTree)-> z
-        | BSTZipper(BSTZipPath(path), (Tree(Datum(rk,rh),lc,rc) as root)) ->
+        | BSTZipper(BSTZipPath(path), (Tree(Datum(rk,rh,_),lc,rc) as root)) ->
             if k < rk then
                 zipTraverse (BSTZipper(BSTZipPath((Left,root)  :: path), lc)) k
             elif rk < k then
@@ -310,15 +319,15 @@ module BalancedBinaryTree =
     let rec zipSplitR ls rs z =
         match z with
         | BSTZipper(BSTZipPath([]), _) -> ls , rs
-        | BSTZipper(BSTZipPath(headZ :: tailZ), (Tree(Datum(fk,_),flc,frc) as focusTree) ) ->
+        | BSTZipper(BSTZipPath(headZ :: tailZ), (Tree(Datum(fk,_,_),flc,frc) as focusTree) ) ->
             match headZ with
-            | Left, (Tree(Datum(dk,_),dlc,drc) as ptOfDeparture) ->
+            | Left, (Tree(Datum(dk,_,_),dlc,drc) as ptOfDeparture) ->
                 zipSplitR
                     ls
                     // (concatTrees drc dk rs)
                     (concatTrees rs dk drc)
                     (BSTZipper(BSTZipPath(tailZ), ptOfDeparture))
-            | Right, (Tree(Datum(dk,_),dlc,drc) as ptOfDeparture) ->
+            | Right, (Tree(Datum(dk,_,_),dlc,drc) as ptOfDeparture) ->
                 zipSplitR
                     (concatTrees dlc dk ls)
                     rs
@@ -340,7 +349,7 @@ module BalancedBinaryTree =
             // The zipper traversal fell off the tree, i.e., the sought-after key
             // did not exist in the set:
             match headZ with
-            | Left, (Tree(Datum(dk,_),_,rc) as ptOfOrigin) ->
+            | Left, (Tree(Datum(dk,_,_),_,rc) as ptOfOrigin) ->
                 // ordering of the subtrees:
                 //   EmptyTree (aka "currentFocus")
                 //   dk
@@ -350,7 +359,7 @@ module BalancedBinaryTree =
                     // (concatTrees rc dk EmptyTree)
                     (concatTrees EmptyTree dk rc)
                     (BSTZipper(BSTZipPath(tailZ), ptOfOrigin))
-            | Right, (Tree(Datum(dk,_),lc,_) as ptOfOrigin) ->
+            | Right, (Tree(Datum(dk,_,_),lc,_) as ptOfOrigin) ->
                 // ordering of the subtrees:
                 //   lc (which is to the left of the key which is in the origin tree)
                 //   dk
@@ -362,9 +371,9 @@ module BalancedBinaryTree =
                     (BSTZipper(BSTZipPath(tailZ), ptOfOrigin))
             | _, EmptyTree ->
                 failwith "zipSplit:  impossible pattern in zipper head, left the tree."
-        | BSTZipper(BSTZipPath(headZ :: tailZ), (Tree(Datum(fk,_),flc,frc) as currentFocus)) ->
+        | BSTZipper(BSTZipPath(headZ :: tailZ), (Tree(Datum(fk,_,_),flc,frc) as currentFocus)) ->
             match headZ with
-            | Left, (Tree(Datum(dk,_),_,rc) as ptOfOrigin) ->
+            | Left, (Tree(Datum(dk,_,_),_,rc) as ptOfOrigin) ->
                 // ordering of the subtrees:
                 //   frc (contribution of the currentFocus to the right-hand partition)
                 //   dk
@@ -373,7 +382,7 @@ module BalancedBinaryTree =
                     flc
                     (concatTrees frc dk rc)
                     (BSTZipper(BSTZipPath(tailZ), ptOfOrigin))
-            | Right, (Tree(Datum(dk,_),lc,_) as ptOfOrigin) ->
+            | Right, (Tree(Datum(dk,_,_),lc,_) as ptOfOrigin) ->
                 // ordering of the subtrees:
                 //   lc (which is to the left of all of the keys in the focus)
                 //   dk
@@ -401,7 +410,7 @@ module BalancedBinaryTree =
     let rec treeInorderR listAcc t =    
         match t with
         | EmptyTree -> listAcc
-        | Tree(Datum(dk,_),lc,rc) ->
+        | Tree(Datum(dk,_,_),lc,rc) ->
             dk :: (treeInorderR listAcc lc) 
             |> (flip treeInorderR rc)
 
@@ -418,14 +427,14 @@ module BalancedBinaryTree =
             | EmptyTree -> 
                 // Shouldn't happen unless s is an EmptyTree to start with?
                 EmptyTree, None, EmptyTree
-            | Tree(Datum(k,_),lc,rc) ->
+            | Tree(Datum(k,_,_),lc,rc) ->
                 lc, Some k, rc
         | BSTZipper(BSTZipPath(z), t) ->
             let splitKey =
                 match t with
                 | EmptyTree ->
                     None
-                | Tree(Datum(k,_),_,_) ->
+                | Tree(Datum(k,_,_),_,_) ->
                     Some k
             match zipSplit locZipper with
             | l, r ->
@@ -439,7 +448,7 @@ module BalancedBinaryTree =
         | Tree(_) ->
             match s2 with
             | EmptyTree -> s1
-            | Tree(Datum(k2,_),lc2,rc2) ->
+            | Tree(Datum(k2,_,_),lc2,rc2) ->
                 match splitSet s1 k2 with
                 | partL1, _, partR1 ->
                     let unionL =
@@ -451,10 +460,10 @@ module BalancedBinaryTree =
     let rec setIntersection s1 s2 =
         match s1 with
         | EmptyTree -> EmptyTree
-        | Tree(Datum(k1,_),_,_) ->
+        | Tree(Datum(k1,_,_),_,_) ->
             match s2 with
             | EmptyTree -> EmptyTree
-            | Tree(Datum(k2,_),lc2,rc2) ->
+            | Tree(Datum(k2,_,_),lc2,rc2) ->
                 match splitSet s1 k2 with
                 | partL1, sKeyOption, partR1 ->
                     let intersectL =
@@ -470,10 +479,10 @@ module BalancedBinaryTree =
     let rec setDifference s1 s2 =
         match s1 with
         | EmptyTree -> EmptyTree
-        | Tree(Datum(k1,_),lc1,rc1) ->
+        | Tree(Datum(k1,_,_),lc1,rc1) ->
             match s2 with
             | EmptyTree -> s1
-            | Tree(Datum(k2,_),lc2,rc2) ->
+            | Tree(Datum(k2,_,_),lc2,rc2) ->
                 match splitSet s1 k2 with
                 | partL1, sKeyOption, partR1 ->
                     let diffL =
@@ -620,6 +629,34 @@ module BalancedBinaryTree =
                 // must add the count from the lChild of t, and the 
                 // root node of t, to the accumulated rank:
                 zipRankR (tailZ, t) leftCount + 1 + (inorderCount (lChild t))
+
+    // Calculates rank of an element x, or rank element x would have it were present,
+    // in the set-represented-as-search-tree:
+    let rec setRankOf s x acc =
+        match s with
+        | EmptyTree -> 
+            acc
+        | Tree(Datum(k,h,c),lt,rt) ->
+            if x < k then 
+                setRankOf lt x acc
+            else 
+                if k < x then 
+                    setRankOf rt x acc + 1 + tCard lt
+                else 
+                    acc + tCard lt + 1  // this is RANK, not "index-of" so ranks start at 1, not 0!
+
+    let rec setIndex t i acc =
+        match t with
+        | Tree(Datum(k,h,c),lc,rc) -> 
+            if (tCard lc + acc) < i then
+                setIndex rc i (acc + tCard lc + 1)
+            else if i < (tCard lc + acc) then
+                setIndex lc i acc       
+            else
+                Some k
+        | EmptyTree -> 
+            None
+        
 
     let zipMin z =
         zipperTop z |>
